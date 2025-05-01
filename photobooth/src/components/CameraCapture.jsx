@@ -3,13 +3,15 @@ import { Container, Row, Col, Button, Spinner, Image } from 'react-bootstrap';
 import useCamera from '../hooks/useCamera';
 
 function CameraCapture({ onCaptureComplete }) {
+  const COUNTDOWN = 10;
+
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [photos, setPhotos] = useState([]);
   const [isCapturing, setIsCapturing] = useState(false);
-  const [countdown, setCountdown] = useState(10);
+  const [countdown, setCountdown] = useState(COUNTDOWN);
   const [photoIndex, setPhotoIndex] = useState(0);
-  const intervalRef = useRef(null);
+  
 
   useCamera(videoRef); // initialize camera stream
 
@@ -20,18 +22,37 @@ function CameraCapture({ onCaptureComplete }) {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
 
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
+    const previewAspectRatio = 16 / 9;
+    const { videoWidth, videoHeight } = video;
+
+    // Calculate cropping area (center crop to 16:9)
+    let srcWidth = videoWidth;
+    let srcHeight = videoWidth / previewAspectRatio;
+
+    if (srcHeight > videoHeight) {
+      srcHeight = videoHeight;
+      srcWidth = videoHeight * previewAspectRatio;
+    }
+
+    const sx = (videoWidth - srcWidth) / 2;
+    const sy = (videoHeight - srcHeight) / 2;
+
+    // Set canvas size to cropped frame
+    canvas.width = srcWidth;
+    canvas.height = srcHeight;
+
+    // Draw cropped area
+    ctx.drawImage(video, sx, sy, srcWidth, srcHeight, 0, 0, srcWidth, srcHeight);
 
     const imageData = canvas.toDataURL('image/png');
     setPhotos((prev) => [...prev, imageData]);
   };
 
+
   const handleCapture = () => {
     setPhotos([]);
     setPhotoIndex(0);
-    setCountdown(10);
+    setCountdown(COUNTDOWN);
     setIsCapturing(true);
   };
 
@@ -44,14 +65,14 @@ function CameraCapture({ onCaptureComplete }) {
         return;
       }
 
-      setCountdown(10);
+      setCountdown(COUNTDOWN);
 
-      for (let i = 10; i > 0; i--) {
+      for (let i = COUNTDOWN; i > 0; i--) {
         await new Promise((resolve) => {
           timeoutId = setTimeout(() => {
             setCountdown((prev) => prev - 1);
             resolve();
-          }, 1000);
+          }, COUNTDOWN*100);
         });
       }
 
@@ -75,9 +96,16 @@ function CameraCapture({ onCaptureComplete }) {
   }, [photos, onCaptureComplete]);
 
   return (
-    <Container className="d-flex flex-column align-items-center justify-content-center py-4">
-      <Row className="justify-content-center">
-        <Col md="auto" className="text-center">
+    <Container fluid className="py-4 d-flex justify-content-center">
+      <div className="d-flex flex-row flex-wrap align-items-start justify-content-center w-100" style={{ maxWidth: '1200px' }}>
+
+        {/* Camera Preview Section */}
+        <div className="flex-grow-1 text-center mb-4 mb-md-0" style={{ flexBasis: '60%' }}>
+          {isCapturing && (
+            <div className="mt-2 text-muted">
+              Taking photo {photoIndex + 1} in {countdown}s...
+            </div>
+          )}
           <video
             ref={videoRef}
             autoPlay
@@ -87,24 +115,19 @@ function CameraCapture({ onCaptureComplete }) {
               maxWidth: '100%',
               height: 'auto',
               aspectRatio: '16 / 9',
-              objectFit: 'cover'
+              objectFit: 'cover',
             }}
           />
-          {isCapturing && (
-            <div className="mt-2 text-muted">
-              Taking photo {photoIndex + 1} in {countdown}s...
-            </div>
-          )}
           <canvas ref={canvasRef} style={{ display: 'none' }} />
-        </Col>
-      </Row>
+        </div>
 
-      <Row className="mt-3">
-        <Col className="text-center">
+        {/* Controls (Button + Thumbnails) */}
+        <div className="d-flex flex-column align-items-center" style={{ flexBasis: '35%', minWidth: '250px' }}>
           <Button
             variant="primary"
             onClick={handleCapture}
             disabled={isCapturing}
+            className="mb-3"
           >
             {isCapturing ? (
               <>
@@ -118,41 +141,38 @@ function CameraCapture({ onCaptureComplete }) {
                 Capturing...
               </>
             ) : (
-              `Start Capturing`
+              'Start Capturing'
             )}
           </Button>
-        </Col>
-      </Row>
 
-      <Row className="mt-4 justify-content-center">
-        {Array.from({ length: 3 }).map((_, index) => (
-          <Col key={index} xs={6} sm={4} className="d-flex justify-content-center">
-            {photos[index] ? (
-              <Image
-                src={photos[index]}
-                thumbnail
-                style={{
-                  width: '100%',
-                  maxWidth: '200px',
-                  height: 'auto',
-                  aspectRatio: '16 / 9',
-                  objectFit: 'cover'
-                }}
-              />
-            ) : (
-              <div
-                style={{
-                  width: '100%',
-                  maxWidth: '140px',
-                  aspectRatio: '16 / 9',
-                  border: '2px dashed #ccc',
-                  borderRadius: '5px',
-                }}
-              />
-            )}
-          </Col>
-        ))}
-      </Row>
+          <div className="d-flex flex-column align-items-center gap-2">
+            {Array.from({ length: 3 }).map((_, index) => (
+              <div key={index} className="mb-2">
+                {photos[index] ? (
+                  <Image
+                    src={photos[index]}
+                    thumbnail
+                    style={{
+                      width: '160px',
+                      height: '90px',
+                      objectFit: 'cover',
+                    }}
+                  />
+                ) : (
+                  <div
+                    style={{
+                      width: '160px',
+                      height: '90px',
+                      border: '2px dashed #ccc',
+                      borderRadius: '5px',
+                    }}
+                  />
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </Container>
   );
 }

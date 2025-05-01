@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Container, Row, Col, Spinner } from 'react-bootstrap';
-import templateImage from '/assets/templates/default-template.png'; // adjust path if needed
+import templateImage from '/assets/templates/template-16-9.jpg'; // adjust path if needed
 
 function TemplateComposer({ images, onComposeComplete }) {
   const canvasRef = useRef(null);
@@ -20,9 +20,9 @@ function TemplateComposer({ images, onComposeComplete }) {
       ctx.drawImage(template, 0, 0);
 
       const photoPositions = [
-        { x: 60, y: 665, width: 2320, height: 1525 },
-        { x: 2400, y: 665, width: 1130, height: 745 },
-        { x: 2400, y: 1445, width: 1130, height: 745 },
+        { x: 32, y: 794, width: 2798, height: 1574 },
+        { x: 2867, y: 794, width: 1367, height: 769 },
+        { x: 2867, y: 1598, width: 1367, height: 769 },
       ];
 
       let loadedCount = 0;

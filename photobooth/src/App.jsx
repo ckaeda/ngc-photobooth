@@ -3,6 +3,7 @@ import CameraCapture from './components/CameraCapture';
 import TemplateComposer from './components/TemplateComposer';
 import EmailForm from './components/EmailForm';
 import PreviewModal from './components/PreviewModal'; // optional
+import { Container, Row, Col } from 'react-bootstrap';
 
 function App() {
   const [capturedImages, setCapturedImages] = useState([]); // array of 3 images
@@ -10,34 +11,52 @@ function App() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   return (
-    <div className="app-container">
-      {!capturedImages.length ? (
-        <CameraCapture onCaptureComplete={setCapturedImages} />
-      ) : !composedImage ? (
-        <TemplateComposer
-          images={capturedImages}
-          onComposeComplete={(image) => {
-            setComposedImage(image);
-            setIsPreviewOpen(true); // open preview after composing
-          }}
-        />
-      ) : (
-        <>
-          {isPreviewOpen && (
-            <PreviewModal
-              image={composedImage}
-              onConfirm={() => setIsPreviewOpen(false)}
-              onRetake={() => {
-                setCapturedImages([]);
-                setComposedImage(null);
-                setIsPreviewOpen(false);
-              }}
-            />
-          )}
-          {!isPreviewOpen && <EmailForm composedImage={composedImage} />}
-        </>
-      )}
-    </div>
+    <Container
+      fluid
+      className="d-flex flex-column align-items-center justify-content-center"
+      style={{
+        minHeight: '100vh',
+        padding: '2rem',
+        backgroundColor: '#f8f9fa',
+      }}
+    >
+      <div
+        style={{
+          width: '100%',
+          maxWidth: '900px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        {!capturedImages.length ? (
+          <CameraCapture onCaptureComplete={setCapturedImages} />
+        ) : !composedImage ? (
+          <TemplateComposer
+            images={capturedImages}
+            onComposeComplete={(image) => {
+              setComposedImage(image);
+              setIsPreviewOpen(true); // open preview after composing
+            }}
+          />
+        ) : (
+          <>
+            {isPreviewOpen && (
+              <PreviewModal
+                image={composedImage}
+                onConfirm={() => setIsPreviewOpen(false)}
+                onRetake={() => {
+                  setCapturedImages([]);
+                  setComposedImage(null);
+                  setIsPreviewOpen(false);
+                }}
+              />
+            )}
+            {!isPreviewOpen && <EmailForm composedImage={composedImage} />}
+          </>
+        )}
+      </div>
+    </Container>
   );
 }
 
