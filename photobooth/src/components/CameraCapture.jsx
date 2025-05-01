@@ -1,36 +1,72 @@
 import { useState, useRef, useEffect } from 'react';
-import useCamera from '../hooks/useCamera';
 import { Container, Row, Col, Button, Spinner, Image } from 'react-bootstrap';
+import useCamera from '../hooks/useCamera';
 
 function CameraCapture({ onCaptureComplete }) {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [photos, setPhotos] = useState([]);
   const [isCapturing, setIsCapturing] = useState(false);
+  const [countdown, setCountdown] = useState(10);
+  const [photoIndex, setPhotoIndex] = useState(0);
+  const intervalRef = useRef(null);
 
-  useCamera(videoRef);
+  useCamera(videoRef); // initialize camera stream
 
   const capturePhoto = () => {
     if (!videoRef.current || !canvasRef.current) return;
 
-    const ctx = canvasRef.current.getContext('2d');
     const video = videoRef.current;
+    const canvas = canvasRef.current;
+    const ctx = canvas.getContext('2d');
 
-    canvasRef.current.width = video.videoWidth;
-    canvasRef.current.height = video.videoHeight;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
     ctx.drawImage(video, 0, 0, video.videoWidth, video.videoHeight);
 
-    const imageData = canvasRef.current.toDataURL('image/png');
+    const imageData = canvas.toDataURL('image/png');
     setPhotos((prev) => [...prev, imageData]);
   };
 
   const handleCapture = () => {
-    if (photos.length < 3) {
-      setIsCapturing(true);
-      capturePhoto();
-      setTimeout(() => setIsCapturing(false), 400);
-    }
+    setPhotos([]);
+    setPhotoIndex(0);
+    setCountdown(10);
+    setIsCapturing(true);
   };
+
+  useEffect(() => {
+    let timeoutId;
+
+    const captureWithDelay = async (index) => {
+      if (index >= 3) {
+        setIsCapturing(false);
+        return;
+      }
+
+      setCountdown(10);
+
+      for (let i = 10; i > 0; i--) {
+        await new Promise((resolve) => {
+          timeoutId = setTimeout(() => {
+            setCountdown((prev) => prev - 1);
+            resolve();
+          }, 1000);
+        });
+      }
+
+      capturePhoto();
+      setPhotoIndex(index + 1);
+      captureWithDelay(index + 1);
+    };
+
+    if (isCapturing) {
+      captureWithDelay(0);
+    }
+
+    return () => clearTimeout(timeoutId);
+  }, [isCapturing]);
+
 
   useEffect(() => {
     if (photos.length === 3) {
@@ -41,14 +77,24 @@ function CameraCapture({ onCaptureComplete }) {
   return (
     <Container className="d-flex flex-column align-items-center justify-content-center py-4">
       <Row className="justify-content-center">
-        <Col md="auto">
+        <Col md="auto" className="text-center">
           <video
             ref={videoRef}
             autoPlay
             playsInline
-            className="border rounded"
-            style={{ width: '480px', height: '360px', objectFit: 'cover' }}
+            className="border rounded w-100"
+            style={{
+              maxWidth: '100%',
+              height: 'auto',
+              aspectRatio: '16 / 9',
+              objectFit: 'cover'
+            }}
           />
+          {isCapturing && (
+            <div className="mt-2 text-muted">
+              Taking photo {photoIndex + 1} in {countdown}s...
+            </div>
+          )}
           <canvas ref={canvasRef} style={{ display: 'none' }} />
         </Col>
       </Row>
@@ -58,7 +104,7 @@ function CameraCapture({ onCaptureComplete }) {
           <Button
             variant="primary"
             onClick={handleCapture}
-            disabled={isCapturing || photos.length >= 3}
+            disabled={isCapturing}
           >
             {isCapturing ? (
               <>
@@ -72,7 +118,7 @@ function CameraCapture({ onCaptureComplete }) {
                 Capturing...
               </>
             ) : (
-              `Capture Photo ${photos.length + 1}`
+              `Start Capturing`
             )}
           </Button>
         </Col>
@@ -80,18 +126,25 @@ function CameraCapture({ onCaptureComplete }) {
 
       <Row className="mt-4 justify-content-center">
         {Array.from({ length: 3 }).map((_, index) => (
-          <Col key={index} xs={4} md={3} className="d-flex justify-content-center">
+          <Col key={index} xs={6} sm={4} className="d-flex justify-content-center">
             {photos[index] ? (
               <Image
                 src={photos[index]}
                 thumbnail
-                style={{ width: '160px', height: '90px', objectFit: 'cover' }}
+                style={{
+                  width: '100%',
+                  maxWidth: '200px',
+                  height: 'auto',
+                  aspectRatio: '16 / 9',
+                  objectFit: 'cover'
+                }}
               />
             ) : (
               <div
                 style={{
-                  width: '160px',
-                  height: '90px',
+                  width: '100%',
+                  maxWidth: '140px',
+                  aspectRatio: '16 / 9',
                   border: '2px dashed #ccc',
                   borderRadius: '5px',
                 }}

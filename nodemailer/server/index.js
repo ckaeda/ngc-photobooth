@@ -28,6 +28,8 @@ const transporter = nodemailer.createTransport({
 app.post('/api/send-photo', async (req, res) => {
   const { email, image } = req.body;
 
+  console.log(`REQUEST: ${email}`);
+
   if (!email || !image) {
     return res.status(400).json({ message: 'Email and image are required.' });
   }
@@ -48,9 +50,11 @@ app.post('/api/send-photo', async (req, res) => {
     });
 
     res.json({ message: 'Email sent successfully.' });
+    console.log(`SENT: ${email}`);
   } catch (error) {
     console.error('Error sending email:', error);
     res.status(500).json({ message: 'Failed to send email.' });
+    console.log(`ERROR: ${email}`);
   }
 });
 
