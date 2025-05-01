@@ -1,5 +1,5 @@
 export async function sendEmail(email, imageBase64) {
-  const response = await fetch('http://localhost:5000/api/send-photo', {
+  const response = await fetch(`https://${window.location.hostname}:5000/api/send-photo`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

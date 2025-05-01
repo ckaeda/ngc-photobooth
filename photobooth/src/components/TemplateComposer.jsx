@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { Container, Row, Col, Spinner } from 'react-bootstrap';
 import templateImage from '/assets/templates/default-template.png'; // adjust path if needed
 
 function TemplateComposer({ images, onComposeComplete }) {
@@ -13,19 +14,18 @@ function TemplateComposer({ images, onComposeComplete }) {
     template.src = templateImage;
 
     template.onload = () => {
-      // Set canvas size to match the template size
       canvas.width = template.width;
       canvas.height = template.height;
 
-      // Draw the template first
       ctx.drawImage(template, 0, 0);
 
-      // Load and draw the 3 captured images onto specific spots
       const photoPositions = [
-        { x: 50, y: 100, width: 200, height: 200 }, // position for photo 1
-        { x: 300, y: 100, width: 200, height: 200 }, // position for photo 2
-        { x: 550, y: 100, width: 200, height: 200 }, // position for photo 3
+        { x: 60, y: 665, width: 2320, height: 1525 },
+        { x: 2400, y: 665, width: 1130, height: 745 },
+        { x: 2400, y: 1445, width: 1130, height: 745 },
       ];
+
+      let loadedCount = 0;
 
       images.forEach((imgSrc, index) => {
         const img = new Image();
@@ -34,12 +34,12 @@ function TemplateComposer({ images, onComposeComplete }) {
           const pos = photoPositions[index];
           ctx.drawImage(img, pos.x, pos.y, pos.width, pos.height);
 
-          // After all 3 images are drawn, send the composed image back
-          if (index === images.length - 1) {
+          loadedCount++;
+          if (loadedCount === images.length) {
             setTimeout(() => {
               const finalImage = canvas.toDataURL('image/png');
               onComposeComplete(finalImage);
-            }, 500); // slight delay to ensure all images are rendered
+            }, 300); // small delay
           }
         };
       });
@@ -47,10 +47,17 @@ function TemplateComposer({ images, onComposeComplete }) {
   }, [images, onComposeComplete]);
 
   return (
-    <div className="template-composer-container">
-      <h2>Composing your photo...</h2>
-      <canvas ref={canvasRef} style={{ display: 'none' }} />
-    </div>
+    <Container className="text-center mt-5">
+      <Row className="justify-content-center">
+        <Col md={8}>
+          <h4 className="mb-3">Composing your photo...</h4>
+          <Spinner animation="border" role="status" variant="primary">
+            <span className="visually-hidden">Loading...</span>
+          </Spinner>
+          <canvas ref={canvasRef} style={{ display: 'none' }} />
+        </Col>
+      </Row>
+    </Container>
   );
 }
 
