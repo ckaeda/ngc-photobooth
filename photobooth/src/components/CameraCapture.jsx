@@ -3,7 +3,7 @@ import { Container, Row, Col, Button, Spinner, Image } from 'react-bootstrap';
 import useCamera from '../hooks/useCamera';
 
 function CameraCapture({ onCaptureComplete }) {
-  const COUNTDOWN = 10;
+  const COUNTDOWN = 1;
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -11,7 +11,7 @@ function CameraCapture({ onCaptureComplete }) {
   const [isCapturing, setIsCapturing] = useState(false);
   const [countdown, setCountdown] = useState(COUNTDOWN);
   const [photoIndex, setPhotoIndex] = useState(0);
-  
+
 
   useCamera(videoRef); // initialize camera stream
 
@@ -72,7 +72,7 @@ function CameraCapture({ onCaptureComplete }) {
           timeoutId = setTimeout(() => {
             setCountdown((prev) => prev - 1);
             resolve();
-          }, COUNTDOWN*100);
+          }, COUNTDOWN * 100);
         });
       }
 
@@ -97,27 +97,42 @@ function CameraCapture({ onCaptureComplete }) {
 
   return (
     <Container fluid className="py-4 d-flex justify-content-center">
-      <div className="d-flex flex-row flex-wrap align-items-start justify-content-center w-100" style={{ maxWidth: '1200px' }}>
+      <div className="d-flex flex-row flex-wrap align-items-start justify-content-center w-100" style={{ maxWidth: '100%' }}>
 
         {/* Camera Preview Section */}
-        <div className="flex-grow-1 text-center mb-4 mb-md-0" style={{ flexBasis: '60%' }}>
-          {isCapturing && (
-            <div className="mt-2 text-muted">
-              Taking photo {photoIndex + 1} in {countdown}s...
-            </div>
-          )}
-          <video
-            ref={videoRef}
-            autoPlay
-            playsInline
-            className="border rounded w-100"
-            style={{
-              maxWidth: '100%',
-              height: 'auto',
-              aspectRatio: '16 / 9',
-              objectFit: 'cover',
-            }}
-          />
+        <div className="flex-grow-1 text-center mb-4 mb-md-0 position-relative" style={{ flexBasis: '60%' }}>
+          <div style={{ position: 'relative', display: 'inline-block', width: '100%' }}>
+            <video
+              ref={videoRef}
+              autoPlay
+              playsInline
+              className="border rounded w-100"
+              style={{
+                maxWidth: '50rem',
+                height: 'auto',
+                aspectRatio: '16 / 9',
+                objectFit: 'cover',
+              }}
+            />
+            {isCapturing && (
+              <div
+                style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                  fontSize: '8rem',
+                  fontWeight: 'bold',
+                  color: 'white',
+                  opacity: countdown/10,
+                  textShadow: '2px 2px 8px rgba(0,0,0,0.8)',
+                  pointerEvents: 'none',
+                }}
+              >
+                {countdown > 0 ? countdown : ''}
+              </div>
+            )}
+          </div>
           <canvas ref={canvasRef} style={{ display: 'none' }} />
         </div>
 
@@ -145,7 +160,7 @@ function CameraCapture({ onCaptureComplete }) {
             )}
           </Button>
 
-          <div className="d-flex flex-column align-items-center gap-2">
+          <div className="d-flex flex-column align-items-center gap-2 flex-grow-1">
             {Array.from({ length: 3 }).map((_, index) => (
               <div key={index} className="mb-2">
                 {photos[index] ? (
@@ -153,16 +168,18 @@ function CameraCapture({ onCaptureComplete }) {
                     src={photos[index]}
                     thumbnail
                     style={{
-                      width: '160px',
-                      height: '90px',
+                      width: '12rem',
+                      height: 'auto',
+                      aspectRatio: '16 / 9',
                       objectFit: 'cover',
                     }}
                   />
                 ) : (
                   <div
                     style={{
-                      width: '160px',
-                      height: '90px',
+                      width: '12rem',
+                      height: 'auto',
+                      aspectRatio: '16 / 9',
                       border: '2px dashed #ccc',
                       borderRadius: '5px',
                     }}

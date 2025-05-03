@@ -20,15 +20,7 @@ function App() {
         backgroundColor: '#f8f9fa',
       }}
     >
-      <div
-        style={{
-          width: '100%',
-          maxWidth: '900px',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
+      <div className="w-100" style={{ maxWidth: '100%' }}>
         {!capturedImages.length ? (
           <CameraCapture onCaptureComplete={setCapturedImages} />
         ) : !composedImage ? (
@@ -36,7 +28,7 @@ function App() {
             images={capturedImages}
             onComposeComplete={(image) => {
               setComposedImage(image);
-              setIsPreviewOpen(true); // open preview after composing
+              setIsPreviewOpen(true);
             }}
           />
         ) : (
@@ -57,6 +49,7 @@ function App() {
         )}
       </div>
     </Container>
+
   );
 }
 

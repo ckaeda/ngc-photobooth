@@ -28,12 +28,13 @@ function EmailForm({ composedImage }) {
       <Container className="text-center p-4">
         <h2>Thank you!</h2>
         <p>Your photo has been sent to {email} 🎉</p>
+        <Button onClick={() => {window.location.reload()}}>Take another picture?</Button>
       </Container>
     );
   }
 
   return (
-    <Container className="p-4">
+    <Container className="p-4" style={{maxWidth: '25rem'}}>
       <h2 className="text-center mb-4">Send Your Photo</h2>
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3" controlId="formEmail">

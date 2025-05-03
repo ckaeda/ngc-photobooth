@@ -1,6 +1,15 @@
 import { Modal, Button } from 'react-bootstrap';
 
 function PreviewModal({ image, onConfirm, onRetake }) {
+  const handleDownload = () => {
+    const link = document.createElement('a');
+    link.href = image;
+    link.download = 'photobooth-picture.png'; // or jpg if your base64 is jpg
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <Modal show={true} onHide={onRetake} centered size="lg">
       <Modal.Header closeButton>
@@ -17,6 +26,9 @@ function PreviewModal({ image, onConfirm, onRetake }) {
       </Modal.Body>
 
       <Modal.Footer>
+        <Button variant="info" onClick={handleDownload}>
+          Save to Device
+        </Button>
         <Button variant="danger" onClick={onRetake}>
           Retake
         </Button>

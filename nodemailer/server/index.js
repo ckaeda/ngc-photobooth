@@ -1,6 +1,7 @@
 const express = require('express');
 const https = require('https');
 const fs = require('fs');
+const path = require('path');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const nodemailer = require('nodemailer');
@@ -35,6 +36,30 @@ app.post('/api/send-photo', async (req, res) => {
   }
 
   try {
+    // Ensure "pictures" directory exists
+    const picturesDir = path.join(__dirname, 'pictures');
+    if (!fs.existsSync(picturesDir)) {
+      fs.mkdirSync(picturesDir);
+    }
+
+    // Sanitize and prepare the base filename
+    const baseName = email.replace(/@/g, '__').replace(/[^a-zA-Z0-9_\-\.]/g, '');
+    let fileName = `${baseName}.jpg`;
+    let filePath = path.join(picturesDir, fileName);
+
+    // If file exists, append (n)
+    let counter = 1;
+    while (fs.existsSync(filePath)) {
+      fileName = `${baseName}(${counter}).jpg`;
+      filePath = path.join(picturesDir, fileName);
+      counter++;
+    }
+
+    // Extract base64 content and save the image
+    const base64Data = image.split('base64,')[1];
+    fs.writeFileSync(filePath, base64Data, 'base64');
+
+    // Send email
     await transporter.sendMail({
       from: `"NGC Photobooth" <${process.env.EMAIL_USER}>`,
       to: email,
@@ -43,20 +68,21 @@ app.post('/api/send-photo', async (req, res) => {
       attachments: [
         {
           filename: 'photobooth.jpg',
-          content: image.split('base64,')[1],
+          content: base64Data,
           encoding: 'base64',
         },
       ],
     });
 
     res.json({ message: 'Email sent successfully.' });
-    console.log(`SENT: ${email}`);
+    console.log(`SENT: ${email} -> Saved as ${fileName}`);
   } catch (error) {
     console.error('Error sending email:', error);
     res.status(500).json({ message: 'Failed to send email.' });
     console.log(`ERROR: ${email}`);
   }
 });
+
 
 // Start HTTPS server
 https.createServer({ key, cert }, app).listen(PORT, '0.0.0.0', () => {
