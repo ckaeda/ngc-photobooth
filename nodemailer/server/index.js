@@ -44,13 +44,13 @@ app.post('/api/send-photo', async (req, res) => {
 
     // Sanitize and prepare the base filename
     const baseName = email.replace(/@/g, '__').replace(/[^a-zA-Z0-9_\-\.]/g, '');
-    let fileName = `${baseName}.jpg`;
+    let fileName = `${baseName}.png`;
     let filePath = path.join(picturesDir, fileName);
 
     // If file exists, append (n)
     let counter = 1;
     while (fs.existsSync(filePath)) {
-      fileName = `${baseName}(${counter}).jpg`;
+      fileName = `${baseName}(${counter}).png`;
       filePath = path.join(picturesDir, fileName);
       counter++;
     }
@@ -67,7 +67,7 @@ app.post('/api/send-photo', async (req, res) => {
       html: '<p>Thanks for using our photobooth! 🎉</p><p>God bless!</p>',
       attachments: [
         {
-          filename: 'photobooth.jpg',
+          filename: 'photobooth.png',
           content: base64Data,
           encoding: 'base64',
         },

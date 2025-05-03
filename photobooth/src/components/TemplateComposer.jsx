@@ -20,9 +20,9 @@ function TemplateComposer({ images, onComposeComplete }) {
       ctx.drawImage(template, 0, 0);
 
       const photoPositions = [
-        { x: 17, y: 358, width: 1254, height: 1254*9/16 },
-        { x: 1290, y: 360, width: 612, height: 612*9/16 },
-        { x: 1290, y: 720, width: 612, height: 612*9/16 },
+        { x: 16, y: 358, width: 1256, height: 1256*9/16 },
+        { x: 1290, y: 359, width: 614, height: 614*9/16 },
+        { x: 1290, y: 720, width: 614, height: 614*9/16 },
       ];
 
       let loadedCount = 0;
