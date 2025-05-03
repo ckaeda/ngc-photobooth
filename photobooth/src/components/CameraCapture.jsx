@@ -1,17 +1,16 @@
 import { useState, useRef, useEffect } from 'react';
-import { Container, Row, Col, Button, Spinner, Image } from 'react-bootstrap';
+import { Container, Button, Spinner, Image } from 'react-bootstrap';
 import useCamera from '../hooks/useCamera';
 
 function CameraCapture({ onCaptureComplete }) {
-  const COUNTDOWN = 1;
+  const COUNTDOWN = 10;
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [photos, setPhotos] = useState([]);
   const [isCapturing, setIsCapturing] = useState(false);
   const [countdown, setCountdown] = useState(COUNTDOWN);
-  const [photoIndex, setPhotoIndex] = useState(0);
-
+  const [isMirrored, setIsMirrored] = useState(false); // New
 
   useCamera(videoRef); // initialize camera stream
 
@@ -25,7 +24,6 @@ function CameraCapture({ onCaptureComplete }) {
     const previewAspectRatio = 16 / 9;
     const { videoWidth, videoHeight } = video;
 
-    // Calculate cropping area (center crop to 16:9)
     let srcWidth = videoWidth;
     let srcHeight = videoWidth / previewAspectRatio;
 
@@ -37,21 +35,25 @@ function CameraCapture({ onCaptureComplete }) {
     const sx = (videoWidth - srcWidth) / 2;
     const sy = (videoHeight - srcHeight) / 2;
 
-    // Set canvas size to cropped frame
     canvas.width = srcWidth;
     canvas.height = srcHeight;
 
-    // Draw cropped area
+    if (isMirrored) {
+      ctx.translate(canvas.width, 0);
+      ctx.scale(-1, 1);
+    }
+
     ctx.drawImage(video, sx, sy, srcWidth, srcHeight, 0, 0, srcWidth, srcHeight);
+    if (isMirrored) {
+      ctx.setTransform(1, 0, 0, 1, 0, 0); // reset transform
+    }
 
     const imageData = canvas.toDataURL('image/png');
     setPhotos((prev) => [...prev, imageData]);
   };
 
-
   const handleCapture = () => {
     setPhotos([]);
-    setPhotoIndex(0);
     setCountdown(COUNTDOWN);
     setIsCapturing(true);
   };
@@ -77,7 +79,6 @@ function CameraCapture({ onCaptureComplete }) {
       }
 
       capturePhoto();
-      setPhotoIndex(index + 1);
       captureWithDelay(index + 1);
     };
 
@@ -88,7 +89,6 @@ function CameraCapture({ onCaptureComplete }) {
     return () => clearTimeout(timeoutId);
   }, [isCapturing]);
 
-
   useEffect(() => {
     if (photos.length === 3) {
       onCaptureComplete(photos);
@@ -98,7 +98,6 @@ function CameraCapture({ onCaptureComplete }) {
   return (
     <Container fluid className="py-4 d-flex justify-content-center">
       <div className="d-flex flex-row flex-wrap align-items-start justify-content-center w-100" style={{ maxWidth: '100%' }}>
-
         {/* Camera Preview Section */}
         <div className="flex-grow-1 text-center mb-4 mb-md-0 position-relative" style={{ flexBasis: '60%' }}>
           <div style={{ position: 'relative', display: 'inline-block', width: '100%' }}>
@@ -112,6 +111,7 @@ function CameraCapture({ onCaptureComplete }) {
                 height: 'auto',
                 aspectRatio: '16 / 9',
                 objectFit: 'cover',
+                transform: isMirrored ? 'scaleX(-1)' : 'none', // Mirror effect
               }}
             />
             {isCapturing && (
@@ -124,7 +124,7 @@ function CameraCapture({ onCaptureComplete }) {
                   fontSize: '8rem',
                   fontWeight: 'bold',
                   color: 'white',
-                  opacity: countdown/10,
+                  opacity: countdown / 10,
                   textShadow: '2px 2px 8px rgba(0,0,0,0.8)',
                   pointerEvents: 'none',
                 }}
@@ -132,6 +132,14 @@ function CameraCapture({ onCaptureComplete }) {
                 {countdown > 0 ? countdown : ''}
               </div>
             )}
+            <Button
+              variant={isMirrored ? 'secondary' : 'outline-secondary'}
+              onClick={() => setIsMirrored((prev) => !prev)}
+              size="sm"
+              className="mb-3"
+            >
+              {isMirrored ? 'Unmirror' : 'Mirror Camera'}
+            </Button>
           </div>
           <canvas ref={canvasRef} style={{ display: 'none' }} />
         </div>
@@ -142,7 +150,7 @@ function CameraCapture({ onCaptureComplete }) {
             variant="primary"
             onClick={handleCapture}
             disabled={isCapturing}
-            className="mb-3"
+            className="mb-2"
           >
             {isCapturing ? (
               <>
