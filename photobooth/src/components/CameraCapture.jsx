@@ -121,7 +121,7 @@ function CameraCapture({ onCaptureComplete }) {
                   top: '50%',
                   left: '50%',
                   transform: 'translate(-50%, -50%)',
-                  fontSize: '8rem',
+                  fontSize: '10rem',
                   fontWeight: 'bold',
                   color: 'white',
                   opacity: countdown / 10,
@@ -132,15 +132,15 @@ function CameraCapture({ onCaptureComplete }) {
                 {countdown > 0 ? countdown : ''}
               </div>
             )}
-            <Button
-              variant={isMirrored ? 'secondary' : 'outline-secondary'}
-              onClick={() => setIsMirrored((prev) => !prev)}
-              size="sm"
-              className="mb-3"
-            >
-              {isMirrored ? 'Unmirror' : 'Mirror Camera'}
-            </Button>
           </div>
+          <Button
+            variant={'secondary'}
+            onClick={() => setIsMirrored((prev) => !prev)}
+            size="sm"
+            className="mb-3"
+          >
+            Mirror Camera
+          </Button>
           <canvas ref={canvasRef} style={{ display: 'none' }} />
         </div>
 
