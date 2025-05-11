@@ -8,7 +8,7 @@ import { Container, Row, Col } from 'react-bootstrap';
 function App() {
   const [capturedImages, setCapturedImages] = useState([]); // array of 3 images
   const [composedImage, setComposedImage] = useState(null); // final image after adding template
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  // const [isPreviewOpen, setIsPreviewOpen] = useState(false);
 
   return (
     <Container
@@ -28,7 +28,7 @@ function App() {
             images={capturedImages}
             onComposeComplete={(image) => {
               setComposedImage(image);
-              setIsPreviewOpen(true);
+              // setIsPreviewOpen(true);
             }}
           />
         ) : (

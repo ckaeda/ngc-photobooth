@@ -1,9 +1,9 @@
 import { useState, useRef, useEffect } from 'react';
-import { Container, Button, Spinner } from 'react-bootstrap';
+import { Container, Button } from 'react-bootstrap';
 import useCamera from '../hooks/useCamera';
 
 function CameraCapture({ onCaptureComplete }) {
-  const COUNTDOWN = 10;
+  const COUNTDOWN = 5;
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
@@ -11,11 +11,15 @@ function CameraCapture({ onCaptureComplete }) {
   const [isCapturing, setIsCapturing] = useState(false);
   const [countdown, setCountdown] = useState(COUNTDOWN);
   const [isMirrored, setIsMirrored] = useState(false);
+  const [flash, setFlash] = useState(false);
 
   useCamera(videoRef); // initialize camera stream
 
   const capturePhoto = () => {
     if (!videoRef.current || !canvasRef.current) return;
+
+    setFlash(true);
+    setTimeout(() => setFlash(false), 200);
 
     const video = videoRef.current;
     const canvas = canvasRef.current;
@@ -118,6 +122,22 @@ function CameraCapture({ onCaptureComplete }) {
             transform: isMirrored ? 'scaleX(-1)' : 'none',
           }}
         />
+        {flash && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              pointerEvents: 'none',
+              zIndex: 3,
+              background: 'radial-gradient(circle, rgba(255,255,255,0) 40%, rgba(255,255,255,0.6) 100%)',
+              // opacity: 0.8,
+              transition: 'opacity 0.3s ease-out',
+            }}
+          />
+        )}
 
         {/* Countdown Overlay */}
         {isCapturing && (
