@@ -11,7 +11,7 @@ function EmailForm({ composedImage }) {
   const handleDownload = () => {
     const link = document.createElement('a');
     link.href = composedImage;
-    link.download = 'photobooth-picture.png'; // or jpg if your base64 is jpg
+    link.download = 'photobooth-picture.png';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -37,13 +37,28 @@ function EmailForm({ composedImage }) {
       <Container className="text-center p-4">
         <h2>Thank you!</h2>
         <p>Your photo has been sent to {email} 🎉</p>
-        <Button onClick={() => { window.location.reload() }}>Take another picture?</Button>
+        <Button onClick={() => window.location.reload()}>Take another picture?</Button>
       </Container>
     );
   }
 
   return (
-    <Container className="p-4" style={{ maxWidth: '25rem' }}>
+    <Container className="p-4" style={{ maxWidth: '40rem' }}>
+      <Container className="text-center mb-4">
+        <img
+          src={composedImage}
+          alt="Preview"
+          className="img-fluid rounded shadow"
+          style={{
+            maxHeight: '70vh',  // use more vertical space
+            width: '100%',
+            objectFit: 'contain',
+          }}
+        />
+        <Button variant="danger" className="mt-3" onClick={() => window.location.reload()}>
+          Retake Picture
+        </Button>
+      </Container>
       <h2 className="text-center mb-4">Send Your Photo</h2>
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3" controlId="formEmail">
@@ -56,18 +71,16 @@ function EmailForm({ composedImage }) {
             required
           />
         </Form.Group>
-        <div className="d-grid">
+        <div className="d-grid gap-2">
           <Button type="submit" variant="primary" disabled={sending || !email}>
             {sending ? 'Sending...' : 'Send Photo'}
           </Button>
-          <br />
           <Button variant="info" onClick={handleDownload}>
             Save to Device
           </Button>
         </div>
         {error && <Alert variant="danger" className="mt-3">{error}</Alert>}
       </Form>
-
     </Container>
   );
 }

@@ -33,7 +33,7 @@ function App() {
           />
         ) : (
           <>
-            {isPreviewOpen && (
+            {/* {isPreviewOpen && (
               <PreviewModal
                 image={composedImage}
                 onConfirm={() => setIsPreviewOpen(false)}
@@ -43,8 +43,9 @@ function App() {
                   setIsPreviewOpen(false);
                 }}
               />
-            )}
-            {!isPreviewOpen && <EmailForm composedImage={composedImage} />}
+            )} */}
+            {/* {!isPreviewOpen && <EmailForm composedImage={composedImage} />} */}
+            <EmailForm composedImage={composedImage} />
           </>
         )}
       </div>

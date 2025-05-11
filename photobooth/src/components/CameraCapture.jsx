@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
-import { Container, Button, Spinner, Image } from 'react-bootstrap';
+import { Container, Button, Spinner } from 'react-bootstrap';
 import useCamera from '../hooks/useCamera';
 
 function CameraCapture({ onCaptureComplete }) {
@@ -10,7 +10,7 @@ function CameraCapture({ onCaptureComplete }) {
   const [photos, setPhotos] = useState([]);
   const [isCapturing, setIsCapturing] = useState(false);
   const [countdown, setCountdown] = useState(COUNTDOWN);
-  const [isMirrored, setIsMirrored] = useState(false); // New
+  const [isMirrored, setIsMirrored] = useState(false);
 
   useCamera(videoRef); // initialize camera stream
 
@@ -45,7 +45,7 @@ function CameraCapture({ onCaptureComplete }) {
 
     ctx.drawImage(video, sx, sy, srcWidth, srcHeight, 0, 0, srcWidth, srcHeight);
     if (isMirrored) {
-      ctx.setTransform(1, 0, 0, 1, 0, 0); // reset transform
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
     }
 
     const imageData = canvas.toDataURL('image/png');
@@ -74,11 +74,19 @@ function CameraCapture({ onCaptureComplete }) {
           timeoutId = setTimeout(() => {
             setCountdown((prev) => prev - 1);
             resolve();
-          }, COUNTDOWN * 100);
+          }, 1000); // 2 second per countdown tick
         });
       }
 
       capturePhoto();
+
+      // Pause the preview for 1 second
+      if (videoRef.current) videoRef.current.pause();
+
+      await new Promise((resolve) => setTimeout(resolve, 2000));
+
+      if (videoRef.current) videoRef.current.play();
+
       captureWithDelay(index + 1);
     };
 
@@ -96,109 +104,79 @@ function CameraCapture({ onCaptureComplete }) {
   }, [photos, onCaptureComplete]);
 
   return (
-    <Container fluid className="py-4 d-flex justify-content-center">
-      <div className="d-flex flex-row flex-wrap align-items-start justify-content-center w-100" style={{ maxWidth: '100%' }}>
-        {/* Camera Preview Section */}
-        <div className="flex-grow-1 text-center mb-4 mb-md-0 position-relative" style={{ flexBasis: '60%' }}>
-          <div style={{ position: 'relative', display: 'inline-block', width: '100%' }}>
-            <video
-              ref={videoRef}
-              autoPlay
-              playsInline
-              className="border rounded w-100"
-              style={{
-                maxWidth: '50rem',
-                height: 'auto',
-                aspectRatio: '16 / 9',
-                objectFit: 'cover',
-                transform: isMirrored ? 'scaleX(-1)' : 'none', // Mirror effect
-              }}
-            />
-            {isCapturing && (
-              <div
-                style={{
-                  position: 'absolute',
-                  top: '50%',
-                  left: '50%',
-                  transform: 'translate(-50%, -50%)',
-                  fontSize: '10rem',
-                  fontWeight: 'bold',
-                  color: 'white',
-                  opacity: countdown / 10,
-                  textShadow: '2px 2px 8px rgba(0,0,0,0.8)',
-                  pointerEvents: 'none',
-                }}
-              >
-                {countdown > 0 ? countdown : ''}
-              </div>
-            )}
+    <Container fluid className="py-4 d-flex flex-column align-items-center">
+      <div className="position-relative w-100" style={{ maxWidth: '70rem' }}>
+        {/* Video Preview */}
+        <video
+          ref={videoRef}
+          autoPlay
+          playsInline
+          className="border rounded w-100"
+          style={{
+            aspectRatio: '16 / 9',
+            objectFit: 'cover',
+            transform: isMirrored ? 'scaleX(-1)' : 'none',
+          }}
+        />
+
+        {/* Countdown Overlay */}
+        {isCapturing && (
+          <div
+            style={{
+              position: 'absolute',
+              top: '50%',
+              left: '50%',
+              transform: 'translate(-50%, -50%)',
+              fontSize: '10rem',
+              fontWeight: 'bold',
+              color: 'white',
+              opacity: countdown / 10,
+              textShadow: '2px 2px 8px rgba(0,0,0,0.8)',
+              pointerEvents: 'none',
+            }}
+          >
+            {countdown > 0 ? countdown : ''}
           </div>
+        )}
+
+        {/* Start Capture Button */}
+        {!isCapturing && (
           <Button
-            variant={'secondary'}
+            variant="light"
+            onClick={handleCapture}
+            className="position-absolute"
+            style={{
+              top: '1rem',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              backgroundColor: 'rgba(255,255,255,0.7)',
+              border: 'none',
+              padding: '0.6rem 1.2rem',
+              fontWeight: 'bold',
+              zIndex: 2,
+            }}
+          >
+            Start Capturing
+          </Button>
+        )}
+
+        <canvas ref={canvasRef} style={{ display: 'none' }} />
+      </div>
+
+      {/* Mirror Camera Button Below Preview */}
+      {!isCapturing && (
+        <div className="mt-3">
+          <Button
+            variant="secondary"
             onClick={() => setIsMirrored((prev) => !prev)}
             size="sm"
-            className="mb-3"
           >
             Mirror Camera
           </Button>
-          <canvas ref={canvasRef} style={{ display: 'none' }} />
         </div>
-
-        {/* Controls (Button + Thumbnails) */}
-        <div className="d-flex flex-column align-items-center" style={{ flexBasis: '35%', minWidth: '250px' }}>
-          <Button
-            variant="primary"
-            onClick={handleCapture}
-            disabled={isCapturing}
-            className="mb-2"
-          >
-            {isCapturing ? (
-              <>
-                <Spinner
-                  as="span"
-                  animation="border"
-                  size="sm"
-                  role="status"
-                  aria-hidden="true"
-                />{' '}
-                Capturing...
-              </>
-            ) : (
-              'Start Capturing'
-            )}
-          </Button>
-
-          <div className="d-flex flex-column align-items-center gap-2 flex-grow-1">
-            {Array.from({ length: 3 }).map((_, index) => (
-              <div key={index} className="mb-2">
-                {photos[index] ? (
-                  <Image
-                    src={photos[index]}
-                    thumbnail
-                    style={{
-                      width: '12rem',
-                      height: 'auto',
-                      aspectRatio: '16 / 9',
-                      objectFit: 'cover',
-                    }}
-                  />
-                ) : (
-                  <div
-                    style={{
-                      width: '12rem',
-                      height: 'auto',
-                      aspectRatio: '16 / 9',
-                      border: '2px dashed #ccc',
-                      borderRadius: '5px',
-                    }}
-                  />
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      )}
     </Container>
+
   );
 }
 
