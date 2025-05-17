@@ -5,6 +5,7 @@ const path = require('path');
 const cors = require('cors');
 const dotenv = require('dotenv');
 const nodemailer = require('nodemailer');
+const { GLOBAL } = require('../../photobooth/config/config');
 
 dotenv.config();
 
@@ -44,13 +45,13 @@ app.post('/api/send-photo', async (req, res) => {
 
     // Sanitize and prepare the base filename
     const baseName = email.replace(/@/g, '__').replace(/[^a-zA-Z0-9_\-\.]/g, '');
-    let fileName = `${baseName}.png`;
+    let fileName = `${baseName}.${GLOBAL.IMAGE_FORMAT.slice(-3).toLowerCase()}`;
     let filePath = path.join(picturesDir, fileName);
 
     // If file exists, append (n)
     let counter = 1;
     while (fs.existsSync(filePath)) {
-      fileName = `${baseName}(${counter}).png`;
+      fileName = `${baseName}(${counter}).${GLOBAL.IMAGE_FORMAT.slice(-3).toLowerCase()}`;
       filePath = path.join(picturesDir, fileName);
       counter++;
     }
@@ -67,7 +68,7 @@ app.post('/api/send-photo', async (req, res) => {
       html: '<p>Thanks for using our photobooth! 🎉</p><p>God bless!</p>',
       attachments: [
         {
-          filename: 'photobooth.png',
+          filename: `photobooth.${GLOBAL.IMAGE_FORMAT.slice(-3).toLowerCase()}`,
           content: base64Data,
           encoding: 'base64',
         },

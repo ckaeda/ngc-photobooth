@@ -1,15 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import { Container, Button } from 'react-bootstrap';
 import useCamera from '../hooks/useCamera';
+import { GLOBAL } from '../../config/config';
 
 function CameraCapture({ onCaptureComplete }) {
-  const COUNTDOWN = 5;
-
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const [photos, setPhotos] = useState([]);
   const [isCapturing, setIsCapturing] = useState(false);
-  const [countdown, setCountdown] = useState(COUNTDOWN);
+  const [countdown, setCountdown] = useState(GLOBAL.IMAGE_COUNTDOWN);
   const [isMirrored, setIsMirrored] = useState(false);
   const [flash, setFlash] = useState(false);
 
@@ -25,7 +24,7 @@ function CameraCapture({ onCaptureComplete }) {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
 
-    const previewAspectRatio = 16 / 9;
+    const previewAspectRatio = GLOBAL.ASPECT_RATIO;
     const { videoWidth, videoHeight } = video;
 
     let srcWidth = videoWidth;
@@ -52,13 +51,13 @@ function CameraCapture({ onCaptureComplete }) {
       ctx.setTransform(1, 0, 0, 1, 0, 0);
     }
 
-    const imageData = canvas.toDataURL('image/png');
+    const imageData = canvas.toDataURL(GLOBAL.IMAGE_FORMAT);
     setPhotos((prev) => [...prev, imageData]);
   };
 
   const handleCapture = () => {
     setPhotos([]);
-    setCountdown(COUNTDOWN);
+    setCountdown(GLOBAL.IMAGE_COUNTDOWN);
     setIsCapturing(true);
   };
 
@@ -66,14 +65,14 @@ function CameraCapture({ onCaptureComplete }) {
     let timeoutId;
 
     const captureWithDelay = async (index) => {
-      if (index >= 3) {
+      if (index >= GLOBAL.MAX_PHOTOS) {
         setIsCapturing(false);
         return;
       }
 
-      setCountdown(COUNTDOWN);
+      setCountdown(GLOBAL.IMAGE_COUNTDOWN);
 
-      for (let i = COUNTDOWN; i > 0; i--) {
+      for (let i = GLOBAL.IMAGE_COUNTDOWN; i > 0; i--) {
         await new Promise((resolve) => {
           timeoutId = setTimeout(() => {
             setCountdown((prev) => prev - 1);
@@ -87,7 +86,7 @@ function CameraCapture({ onCaptureComplete }) {
       // Pause the preview for 1 second
       if (videoRef.current) videoRef.current.pause();
 
-      await new Promise((resolve) => setTimeout(resolve, 2000));
+      await new Promise((resolve) => setTimeout(resolve, GLOBAL.CAPTURE_COUNTDOWN*1000));
 
       if (videoRef.current) videoRef.current.play();
 
@@ -102,7 +101,7 @@ function CameraCapture({ onCaptureComplete }) {
   }, [isCapturing]);
 
   useEffect(() => {
-    if (photos.length === 3) {
+    if (photos.length === GLOBAL.MAX_PHOTOS) {
       onCaptureComplete(photos);
     }
   }, [photos, onCaptureComplete]);
@@ -117,7 +116,7 @@ function CameraCapture({ onCaptureComplete }) {
           playsInline
           className="border rounded w-100"
           style={{
-            aspectRatio: '16 / 9',
+            aspectRatio: GLOBAL.ASPECT_RATIO_STR,
             objectFit: 'cover',
             transform: isMirrored ? 'scaleX(-1)' : 'none',
           }}

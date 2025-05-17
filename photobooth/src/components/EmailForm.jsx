@@ -1,6 +1,7 @@
 import { Form, Button, Container, Alert } from 'react-bootstrap';
 import { useState } from 'react';
 import { sendEmail } from '../services/emailService';
+import { GLOBAL } from '../../config/config';
 
 function EmailForm({ composedImage }) {
   const [email, setEmail] = useState('');
@@ -11,7 +12,7 @@ function EmailForm({ composedImage }) {
   const handleDownload = () => {
     const link = document.createElement('a');
     link.href = composedImage;
-    link.download = 'photobooth-picture.png';
+    link.download = `photobooth-picture.${GLOBAL.IMAGE_FORMAT.slice(-3).toLowerCase()}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

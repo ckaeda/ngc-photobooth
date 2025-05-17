@@ -1,12 +1,13 @@
 import { useEffect, useRef } from 'react';
 import { Container, Row, Col, Spinner } from 'react-bootstrap';
+import { GLOBAL } from '../../config/config';
 import templateImage from '/assets/templates/ngc-fake-template.png'; // adjust path if needed
 
 function TemplateComposer({ images, onComposeComplete }) {
   const canvasRef = useRef(null);
 
   useEffect(() => {
-    if (images.length !== 3) return;
+    if (images.length !== GLOBAL.MAX_PHOTOS) return;
 
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
@@ -19,25 +20,19 @@ function TemplateComposer({ images, onComposeComplete }) {
 
       ctx.drawImage(template, 0, 0);
 
-      const photoPositions = [
-        { x: 16, y: 358, width: 1256, height: 1256*9/16 },
-        { x: 1290, y: 359, width: 614, height: 614*9/16 },
-        { x: 1290, y: 720, width: 614, height: 614*9/16 },
-      ];
-
       let loadedCount = 0;
 
       images.forEach((imgSrc, index) => {
         const img = new Image();
         img.src = imgSrc;
         img.onload = () => {
-          const pos = photoPositions[index];
-          ctx.drawImage(img, pos.x, pos.y, pos.width, pos.height);
+          const pos = GLOBAL.PHOTO_POSITIONS[index];
+          ctx.drawImage(img, pos.x, pos.y, pos.width, pos.width / GLOBAL.ASPECT_RATIO);
 
           loadedCount++;
           if (loadedCount === images.length) {
             setTimeout(() => {
-              const finalImage = canvas.toDataURL('image/png');
+              const finalImage = canvas.toDataURL(GLOBAL.IMAGE_FORMAT);
               onComposeComplete(finalImage);
             }, 300); // small delay
           }
