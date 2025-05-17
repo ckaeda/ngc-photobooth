@@ -12,7 +12,7 @@ function CameraCapture({ onCaptureComplete }) {
   const [isMirrored, setIsMirrored] = useState(false);
   const [flash, setFlash] = useState(false);
 
-  useCamera(videoRef); // initialize camera stream
+  const stream = useCamera(videoRef); // initialize camera stream
 
   const capturePhoto = () => {
     if (!videoRef.current || !canvasRef.current) return;
@@ -62,6 +62,14 @@ function CameraCapture({ onCaptureComplete }) {
   };
 
   useEffect(() => {
+    return () => {
+      if (stream) {
+        stream.getTracks().forEach((track) => track.stop());
+      }
+    };
+  }, [stream]);
+
+  useEffect(() => {
     let timeoutId;
 
     const captureWithDelay = async (index) => {
@@ -86,7 +94,7 @@ function CameraCapture({ onCaptureComplete }) {
       // Pause the preview for 1 second
       if (videoRef.current) videoRef.current.pause();
 
-      await new Promise((resolve) => setTimeout(resolve, GLOBAL.CAPTURE_COUNTDOWN*1000));
+      await new Promise((resolve) => setTimeout(resolve, GLOBAL.CAPTURE_COUNTDOWN * 1000));
 
       if (videoRef.current) videoRef.current.play();
 

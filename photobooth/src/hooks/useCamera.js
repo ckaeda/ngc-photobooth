@@ -1,26 +1,33 @@
-import { useEffect } from 'react';
+// useCamera.js
+import { useEffect, useState } from 'react';
 
-function useCamera(videoRef) {
+export default function useCamera(videoRef) {
+  const [stream, setStream] = useState(null);
+
   useEffect(() => {
-    async function startCamera() {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
-        if (videoRef.current) {
-          videoRef.current.srcObject = stream;
-        }
-      } catch (err) {
-        console.error('Error accessing camera:', err);
-      }
-    }
+    let activeStream;
 
-    startCamera();
+    const enableStream = async () => {
+      try {
+        const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
+        if (videoRef.current) {
+          videoRef.current.srcObject = mediaStream;
+        }
+        setStream(mediaStream);
+        activeStream = mediaStream;
+      } catch (err) {
+        console.error('Camera access error:', err);
+      }
+    };
+
+    enableStream();
 
     return () => {
-      if (videoRef.current && videoRef.current.srcObject) {
-        videoRef.current.srcObject.getTracks().forEach(track => track.stop());
+      if (activeStream) {
+        activeStream.getTracks().forEach((track) => track.stop());
       }
     };
   }, [videoRef]);
-}
 
-export default useCamera;
+  return stream;
+}
