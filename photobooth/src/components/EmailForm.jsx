@@ -1,21 +1,36 @@
-import { Form, Button, Container, Alert } from 'react-bootstrap';
+import { Form, Button, Container, Alert, Row, Col } from 'react-bootstrap';
 import { useState } from 'react';
 import { sendEmail } from '../services/emailService';
 import { GLOBAL } from '../../config/config';
 
-function EmailForm({ composedImage }) {
+function EmailForm({ composedImages }) {
   const [email, setEmail] = useState('');
   const [sending, setSending] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [selectedImages, setSelectedImages] = useState(() =>
+    composedImages.map(({ key }) => key)
+  );
 
-  const handleDownload = () => {
-    const link = document.createElement('a');
-    link.href = composedImage;
-    link.download = `photobooth-picture.${GLOBAL.IMAGE_FORMAT.slice(-3).toLowerCase()}`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+  const toggleSelection = (key) => {
+    setSelectedImages((prev) =>
+      prev.includes(key)
+        ? prev.filter((k) => k !== key)
+        : [...prev, key]
+    );
+  };
+
+  const handleDownloadAll = () => {
+    composedImages.forEach(({ key, image }) => {
+      if (!selectedImages.includes(key)) return;
+
+      const link = document.createElement('a');
+      link.href = image;
+      link.download = `photobooth-picture-${key}.${GLOBAL.IMAGE_FORMAT.slice(-3).toLowerCase()}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    });
   };
 
   const handleSubmit = async (e) => {
@@ -24,7 +39,7 @@ function EmailForm({ composedImage }) {
     setError('');
 
     try {
-      await sendEmail(email, composedImage);
+      await sendEmail(email, composedImages); // send all images
       setSuccess(true);
     } catch (err) {
       setError('Failed to send email. Please try again.');
@@ -37,30 +52,48 @@ function EmailForm({ composedImage }) {
     return (
       <Container className="text-center p-4">
         <h2>Thank you!</h2>
-        <p>Your photo has been sent to {email} 🎉</p>
+        <p>Your photo(s) have been sent to {email} 🎉</p>
         <Button onClick={() => window.location.reload()}>Take another picture?</Button>
       </Container>
     );
   }
 
   return (
-    <Container className="p-4" style={{ maxWidth: '40rem' }}>
+    <Container className="p-4" style={{ maxWidth: '50rem' }}>
       <Container className="text-center mb-4">
-        <img
-          src={composedImage}
-          alt="Preview"
-          className="img-fluid rounded shadow"
-          style={{
-            maxHeight: '70vh',  // use more vertical space
-            width: '100%',
-            objectFit: 'contain',
-          }}
-        />
+        <Row className="g-3">
+          {composedImages.map(({ key, image }) => (
+            <Col
+              md={6}
+              key={key}
+              className="d-flex flex-column justify-content-center align-items-center"
+              style={{ height: '45vh' }}
+            >
+              <img
+                src={image}
+                alt={`Preview ${key}`}
+                className="img-fluid rounded shadow mb-2"
+                style={{
+                  maxHeight: '100%',
+                  maxWidth: '100%',
+                  objectFit: 'contain',
+                }}
+              />
+              <Form.Check
+                type="checkbox"
+                id={`select-${key}`}
+                label="Include"
+                checked={selectedImages.includes(key)}
+                onChange={() => toggleSelection(key)}
+              />
+            </Col>
+          ))}
+        </Row>
         <Button variant="danger" className="mt-3" onClick={() => window.location.reload()}>
           Retake Picture
         </Button>
       </Container>
-      <h2 className="text-center mb-4">Send Your Photo</h2>
+      <h2 className="text-center mb-4">Send Your Photos</h2>
       <Form onSubmit={handleSubmit}>
         <Form.Group className="mb-3" controlId="formEmail">
           <Form.Control
@@ -74,10 +107,10 @@ function EmailForm({ composedImage }) {
         </Form.Group>
         <div className="d-grid gap-2">
           <Button type="submit" variant="primary" disabled={sending || !email}>
-            {sending ? 'Sending...' : 'Send Photo'}
+            {sending ? 'Sending...' : 'Send Photos'}
           </Button>
-          <Button variant="info" onClick={handleDownload}>
-            Save to Device
+          <Button variant="info" onClick={handleDownloadAll}>
+            Save All to Device
           </Button>
         </div>
         {error && <Alert variant="danger" className="mt-3">{error}</Alert>}

@@ -2,11 +2,12 @@ import { useState } from 'react';
 import CameraCapture from './components/CameraCapture';
 import TemplateComposer from './components/TemplateComposer';
 import EmailForm from './components/EmailForm';
-import { Container, Row, Col } from 'react-bootstrap';
+import { Container } from 'react-bootstrap';
+import './css/index.css';
 
 function App() {
-  const [capturedImages, setCapturedImages] = useState([]); // array of 3 images
-  const [composedImage, setComposedImage] = useState(null); // final image after adding template
+  const [capturedImages, setCapturedImages] = useState([]);
+  const [composedImages, setComposedImage] = useState(null); // final image after adding template
 
   return (
     <Container
@@ -15,13 +16,15 @@ function App() {
       style={{
         minHeight: '100vh',
         padding: '2rem',
-        backgroundColor: '#f8f9fa',
+        backgroundImage: 'url("/assets/background.jpg")',
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
       }}
     >
       <div className="w-100" style={{ maxWidth: '100%' }}>
         {!capturedImages.length ? (
           <CameraCapture onCaptureComplete={setCapturedImages} />
-        ) : !composedImage ? (
+        ) : !composedImages ? (
           <TemplateComposer
             images={capturedImages}
             onComposeComplete={(image) => {
@@ -30,7 +33,7 @@ function App() {
           />
         ) : (
           <>
-            <EmailForm composedImage={composedImage} />
+            <EmailForm composedImages={composedImages} />
           </>
         )}
       </div>

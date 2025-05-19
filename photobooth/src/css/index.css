@@ -1,0 +1,11 @@
+/* index.css */
+body {
+  font-family: 'Inter', sans-serif !important;
+  color: white !important;
+  margin: 0;
+  padding: 0;
+}
+
+h2, h4 {
+  font-weight: bold !important;
+}
