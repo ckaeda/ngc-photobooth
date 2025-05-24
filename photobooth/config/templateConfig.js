@@ -12,7 +12,7 @@ export const TEMPLATES = {
         ],
     },
     ALPHA_YOUTH_2:{
-        path: '/assets/templates/alpha-youth-1.png',
+        path: '/assets/templates/alpha-youth-2.png',
         noOfPhotos: 6,
         positions: [
             { x: 57.4, y: 71, width: 965.3, height: 467.1 },

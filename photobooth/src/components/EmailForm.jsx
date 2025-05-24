@@ -1,52 +1,52 @@
-import { Form, Button, Container, Alert, Row, Col } from 'react-bootstrap';
+import { Modal, Form, Button, Container, Alert, Row, Col, Toast, ToastContainer } from 'react-bootstrap';
 import { useState } from 'react';
 import { sendEmail } from '../services/emailService';
-import { GLOBAL } from '../../config/config';
 
 function EmailForm({ composedImages }) {
   const [email, setEmail] = useState('');
   const [sending, setSending] = useState(false);
   const [success, setSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [showModal, setShowModal] = useState(false);
   const [selectedImages, setSelectedImages] = useState(() =>
     composedImages.map(({ key }) => key)
   );
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastVariant, setToastVariant] = useState('success');
+  const [showToast, setShowToast] = useState(false);
 
-  const toggleSelection = (key) => {
-    setSelectedImages((prev) =>
-      prev.includes(key)
-        ? prev.filter((k) => k !== key)
-        : [...prev, key]
-    );
+
+  const handleDownload = (image, key) => {
+    const a = document.createElement('a');
+    a.href = image;
+    a.download = `${key}.png`;
+    a.click();
   };
 
-  const handleDownloadAll = () => {
-    composedImages.forEach(({ key, image }) => {
-      if (!selectedImages.includes(key)) return;
-
-      const link = document.createElement('a');
-      link.href = image;
-      link.download = `photobooth-picture-${key}.${GLOBAL.IMAGE_FORMAT.slice(-3).toLowerCase()}`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    });
-  };
-
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    setSending(true);
-    setError('');
 
-    try {
-      await sendEmail(email, composedImages); // send all images
-      setSuccess(true);
-    } catch (err) {
-      setError('Failed to send email. Please try again.');
-    } finally {
-      setSending(false);
-    }
+    const filteredImages = composedImages.filter(({ key }) =>
+      selectedImages.includes(key)
+    );
+
+    setShowModal(false); // Hide modal immediately
+
+    // Fire-and-forget send
+    sendEmail(email, filteredImages)
+      .then(() => {
+        setToastVariant('success');
+        setToastMessage(`Photos successfully sent to ${email} 🎉`);
+      })
+      .catch(() => {
+        setToastVariant('danger');
+        setToastMessage('Failed to send email. Please try again.');
+      })
+      .finally(() => {
+        setShowToast(true);
+      });
   };
+
 
   if (success) {
     return (
@@ -60,64 +60,119 @@ function EmailForm({ composedImages }) {
 
   return (
     <Container className="p-4" style={{ maxWidth: '50rem' }}>
+      <ToastContainer position="bottom-end" className="p-3">
+        <Toast
+          show={showToast}
+          onClose={() => setShowToast(false)}
+          delay={4000}
+          autohide
+          bg={toastVariant}
+        >
+          <Toast.Body className="text-white">{toastMessage}</Toast.Body>
+        </Toast>
+      </ToastContainer>
       <Container className="text-center mb-4">
         <Row className="g-3">
           {composedImages.map(({ key, image }) => (
             <Col
               md={6}
               key={key}
-              className="d-flex flex-column justify-content-center align-items-center"
-              style={{ height: '45vh' }}
+              className="d-flex flex-column justify-content-start align-items-center mb-4"
             >
               <img
                 src={image}
                 alt={`Preview ${key}`}
                 className="img-fluid rounded mb-2"
                 style={{
-                  maxHeight: '100%',
                   maxWidth: '100%',
+                  height: 'auto',
                   objectFit: 'contain',
                   boxShadow: '0 4px 20px rgba(0, 0, 0, 0.7)',
-                  borderRadius: '1rem', // optional for a soft rounded look
+                  borderRadius: '1rem',
                 }}
               />
-
-              <Form.Check
-                type="checkbox"
-                id={`select-${key}`}
-                label="Include"
-                checked={selectedImages.includes(key)}
-                onChange={() => toggleSelection(key)}
-              />
+              <Button variant="secondary" size="sm" onClick={() => handleDownload(image, key)}>
+                Download
+              </Button>
             </Col>
           ))}
         </Row>
-        <Button variant="danger" className="mt-3" onClick={() => window.location.reload()}>
+        <div className="mt-3">
+          <Button
+            type="button"
+            variant="primary"
+            onClick={() => setShowModal(true)}
+            disabled={sending}
+          >
+            {sending ? 'Sending...' : 'Send Photos To Email'}
+          </Button>
+        </div>
+        <Button
+          variant="danger"
+          className="mt-3"
+          onClick={() => {
+            if (window.confirm('Are you sure you want to retake the pictures? Your current photos will be lost.')) {
+              window.location.reload();
+            }
+          }}
+        >
           Retake Picture
         </Button>
       </Container>
-      <h2 className="text-center mb-4">Send Your Photos</h2>
-      <Form onSubmit={handleSubmit}>
-        <Form.Group className="mb-3" controlId="formEmail">
-          <Form.Control
-            type="email"
-            placeholder="Enter your email address"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            disabled={sending}
-            required
-          />
-        </Form.Group>
-        <div className="d-grid gap-2">
-          <Button type="submit" variant="primary" disabled={sending || !email}>
-            {sending ? 'Sending...' : 'Send Photos'}
-          </Button>
-          <Button variant="info" onClick={handleDownloadAll}>
-            Save All to Device
-          </Button>
-        </div>
-        {error && <Alert variant="danger" className="mt-3">{error}</Alert>}
-      </Form>
+      {/* Modal for selecting photos + entering email */}
+      <Modal show={showModal} onHide={() => setShowModal(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Select Photos to Email</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <Form onSubmit={handleSubmit}>
+            <Form.Group className="mb-3" controlId="formEmailModal">
+              <Form.Label>Email address</Form.Label>
+              <Form.Control
+                type="email"
+                placeholder="Enter your email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+              />
+            </Form.Group>
+
+            <Row className="g-2 mb-3">
+              {composedImages.map(({ key, image }) => (
+                <Col xs={6} key={key} className="text-center">
+                  <img
+                    src={image}
+                    alt={`Thumb ${key}`}
+                    className="img-thumbnail mb-1"
+                    style={{ height: '100px', objectFit: 'cover' }}
+                  />
+                  <Form.Check
+                    type="checkbox"
+                    label="Include"
+                    id={`modal-select-${key}`}
+                    checked={selectedImages.includes(key)}
+                    onChange={() =>
+                      setSelectedImages((prev) =>
+                        prev.includes(key)
+                          ? prev.filter((k) => k !== key)
+                          : [...prev, key]
+                      )
+                    }
+                  />
+                </Col>
+              ))}
+            </Row>
+
+            {error && <Alert variant="danger">{error}</Alert>}
+
+            <div className="d-grid gap-2">
+              <Button variant="primary" type="submit" disabled={sending || !email || selectedImages.length === 0}>
+                {sending ? 'Sending...' : 'Email Selected Photos'}
+              </Button>
+            </div>
+          </Form>
+        </Modal.Body>
+      </Modal>
     </Container>
   );
 }
