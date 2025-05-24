@@ -60,7 +60,7 @@ function EmailForm({ composedImages }) {
 
   return (
     <Container className="p-4" style={{ maxWidth: '50rem' }}>
-      <ToastContainer position="bottom-end" className="p-3">
+      <ToastContainer position="top-end" className="p-3">
         <Toast
           show={showToast}
           onClose={() => setShowToast(false)}
@@ -91,7 +91,7 @@ function EmailForm({ composedImages }) {
                   borderRadius: '1rem',
                 }}
               />
-              <Button variant="secondary" size="sm" onClick={() => handleDownload(image, key)}>
+              <Button variant="primary" size="sm" onClick={() => handleDownload(image, key)}>
                 Download
               </Button>
             </Col>
@@ -100,7 +100,7 @@ function EmailForm({ composedImages }) {
         <div className="mt-3">
           <Button
             type="button"
-            variant="primary"
+            variant="secondary"
             onClick={() => setShowModal(true)}
             disabled={sending}
           >
