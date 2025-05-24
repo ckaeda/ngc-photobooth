@@ -11,8 +11,10 @@ function CameraCapture({ onCaptureComplete }) {
   const [countdown, setCountdown] = useState(GLOBAL.IMAGE_COUNTDOWN);
   const [isMirrored, setIsMirrored] = useState(false);
   const [flash, setFlash] = useState(false);
+  const [availableDevices, setAvailableDevices] = useState([]);
+  const [selectedDeviceId, setSelectedDeviceId] = useState(null);
 
-  const stream = useCamera(videoRef); // initialize camera stream
+  const stream = useCamera(videoRef, selectedDeviceId);
 
   const capturePhoto = () => {
     if (!videoRef.current || !canvasRef.current) return;
@@ -60,6 +62,19 @@ function CameraCapture({ onCaptureComplete }) {
     setCountdown(GLOBAL.IMAGE_COUNTDOWN);
     setIsCapturing(true);
   };
+
+  useEffect(() => {
+    navigator.mediaDevices.enumerateDevices()
+      .then((devices) => {
+        const videoDevices = devices.filter((device) => device.kind === 'videoinput');
+        setAvailableDevices(videoDevices);
+        if (videoDevices.length > 0 && !selectedDeviceId) {
+          setSelectedDeviceId(videoDevices[0].deviceId);
+        }
+      })
+      .catch((err) => console.error('Error listing devices:', err));
+  }, []);
+
 
   useEffect(() => {
     return () => {
@@ -199,6 +214,22 @@ function CameraCapture({ onCaptureComplete }) {
             size="sm"
           >
             Mirror Camera
+          </Button>
+        </div>
+      )}
+
+      {availableDevices.length > 1 && !isCapturing && (
+        <div className="mt-2">
+          <Button
+            variant="dark"
+            size="sm"
+            onClick={() => {
+              const currentIndex = availableDevices.findIndex(dev => dev.deviceId === selectedDeviceId);
+              const nextIndex = (currentIndex + 1) % availableDevices.length;
+              setSelectedDeviceId(availableDevices[nextIndex].deviceId);
+            }}
+          >
+            Switch Camera
           </Button>
         </div>
       )}

@@ -1,7 +1,6 @@
-// useCamera.js
 import { useEffect, useState } from 'react';
 
-export default function useCamera(videoRef) {
+function useCamera(videoRef, deviceId) {
   const [stream, setStream] = useState(null);
 
   useEffect(() => {
@@ -9,14 +8,24 @@ export default function useCamera(videoRef) {
 
     const enableStream = async () => {
       try {
-        const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
-        if (videoRef.current) {
-          videoRef.current.srcObject = mediaStream;
+        // Stop previous stream before requesting new one
+        if (stream) {
+          stream.getTracks().forEach((track) => track.stop());
         }
-        setStream(mediaStream);
-        activeStream = mediaStream;
+
+        const constraints = {
+          video: deviceId ? { deviceId: { exact: deviceId } } : true,
+        };
+
+        activeStream = await navigator.mediaDevices.getUserMedia(constraints);
+
+        if (videoRef.current) {
+          videoRef.current.srcObject = activeStream;
+        }
+
+        setStream(activeStream);
       } catch (err) {
-        console.error('Camera access error:', err);
+        console.error('Error accessing camera:', err);
       }
     };
 
@@ -27,7 +36,9 @@ export default function useCamera(videoRef) {
         activeStream.getTracks().forEach((track) => track.stop());
       }
     };
-  }, [videoRef]);
+  }, [videoRef, deviceId]);
 
   return stream;
 }
+
+export default useCamera;
