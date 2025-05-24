@@ -45,23 +45,27 @@ app.post('/api/send-photo', async (req, res) => {
   }
 
   try {
-    const attachments = images.map((imgData, index) => {
-      const base64Data = imgData.split('base64,')[1];
+    const attachments = images.map((imgData, i) => {
+      const base64String = imgData.image;
+      const content = base64String.split('base64,')[1];
+
       return {
-        filename: `photobooth-${index + 1}.png`,
-        content: base64Data,
+        filename: `${imgData.key || `photo-${i + 1}`}.png`,
+        content,
         encoding: 'base64',
       };
     });
+
 
     // Send email
     await transporter.sendMail({
       from: `"NGC Photobooth" <${process.env.EMAIL_USER}>`,
       to: email,
       subject: 'Your NGC Photobooth Pictures! 📸',
-      html: `<p>Thanks for using our photobooth! 🎉</p><p>You have ${images.length} photo(s) attached.</p><p>God bless!</p>`,
+      html: '<p>Thanks for using our photobooth! 🎉</p><p>God bless!</p>',
       attachments,
     });
+
 
     res.json({ message: 'Email sent successfully.' });
     console.log(`SENT: ${email} -> Sent ${images.length} photo(s)`);
