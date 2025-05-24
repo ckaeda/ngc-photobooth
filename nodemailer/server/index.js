@@ -6,7 +6,6 @@ import { dirname, join } from 'path';
 import cors from 'cors';
 import { config } from 'dotenv';
 import { createTransport } from 'nodemailer';
-import { GLOBAL } from '../../photobooth/config/config.js';
 
 config();
 
@@ -49,13 +48,13 @@ app.post('/api/send-photo', async (req, res) => {
 
     // Sanitize and prepare the base filename
     const baseName = email.replace(/@/g, '__').replace(/[^a-zA-Z0-9_\-\.]/g, '');
-    let fileName = `${baseName}.${GLOBAL.IMAGE_FORMAT.slice(-3).toLowerCase()}`;
+    let fileName = `${baseName}.png`;
     let filePath = join(picturesDir, fileName);
 
     // If file exists, append (n)
     let counter = 1;
     while (existsSync(filePath)) {
-      fileName = `${baseName}(${counter}).${GLOBAL.IMAGE_FORMAT.slice(-3).toLowerCase()}`;
+      fileName = `${baseName}(${counter}).png`;
       filePath = join(picturesDir, fileName);
       counter++;
     }
@@ -72,7 +71,7 @@ app.post('/api/send-photo', async (req, res) => {
       html: '<p>Thanks for using our photobooth! 🎉</p><p>God bless!</p>',
       attachments: [
         {
-          filename: `photobooth.${GLOBAL.IMAGE_FORMAT.slice(-3).toLowerCase()}`,
+          filename: `photobooth.png`,
           content: base64Data,
           encoding: 'base64',
         },
