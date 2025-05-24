@@ -1,10 +1,10 @@
-export async function sendEmail(email, imageBase64) {
+export async function sendEmail(email, composedImages) {
   const response = await fetch(`https://ngc-photobooth-production.up.railway.app/api/send-photo`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ email, image: imageBase64 }),
+    body: JSON.stringify({ email, images: composedImages }), // now an array
   });
 
   if (!response.ok) {
