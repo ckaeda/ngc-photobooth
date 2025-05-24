@@ -1,26 +1,14 @@
-import express, { json } from 'express';
-import { createServer } from 'https';
+// api/send-photo.js
 import { readFileSync, existsSync, mkdirSync, writeFileSync } from 'fs';
+import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { dirname, join } from 'path';
-import cors from 'cors';
-import { config } from 'dotenv';
 import { createTransport } from 'nodemailer';
+import { config } from 'dotenv';
 
 config();
 
-const app = express();
-const PORT = process.env.PORT || 5000;
-
-// Load HTTPS credentials
-const key = readFileSync('./certs/cert.key');
-const cert = readFileSync('./certs/cert.crt');
-
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
-
-app.use(cors());
-app.use(json({ limit: '10mb' }));
 
 const transporter = createTransport({
   service: 'gmail',
@@ -30,7 +18,11 @@ const transporter = createTransport({
   },
 });
 
-app.post('/api/send-photo', async (req, res) => {
+export default async function handler(req, res) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ message: 'Method not allowed' });
+  }
+
   const { email, image } = req.body;
 
   console.log(`REQUEST: ${email}`);
@@ -41,9 +33,9 @@ app.post('/api/send-photo', async (req, res) => {
 
   try {
     // Ensure "pictures" directory exists
-    const picturesDir = join(__dirname, 'pictures');
+    const picturesDir = join(__dirname, '../../pictures');
     if (!existsSync(picturesDir)) {
-      mkdirSync(picturesDir);
+      mkdirSync(picturesDir, { recursive: true });
     }
 
     // Sanitize and prepare the base filename
@@ -51,7 +43,6 @@ app.post('/api/send-photo', async (req, res) => {
     let fileName = `${baseName}.png`;
     let filePath = join(picturesDir, fileName);
 
-    // If file exists, append (n)
     let counter = 1;
     while (existsSync(filePath)) {
       fileName = `${baseName}(${counter}).png`;
@@ -59,11 +50,9 @@ app.post('/api/send-photo', async (req, res) => {
       counter++;
     }
 
-    // Extract base64 content and save the image
     const base64Data = image.split('base64,')[1];
     writeFileSync(filePath, base64Data, 'base64');
 
-    // Send email
     await transporter.sendMail({
       from: `"NGC Photobooth" <${process.env.EMAIL_USER}>`,
       to: email,
@@ -78,17 +67,11 @@ app.post('/api/send-photo', async (req, res) => {
       ],
     });
 
-    res.json({ message: 'Email sent successfully.' });
+    res.status(200).json({ message: 'Email sent successfully.' });
     console.log(`SENT: ${email} -> Saved as ${fileName}`);
   } catch (error) {
     console.error('Error sending email:', error);
     res.status(500).json({ message: 'Failed to send email.' });
     console.log(`ERROR: ${email}`);
   }
-});
-
-
-// Start HTTPS server
-createServer({ key, cert }, app).listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 HTTPS Server running at https://0.0.0.0:${PORT}`);
-});
+}
