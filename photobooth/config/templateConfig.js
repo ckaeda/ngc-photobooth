@@ -1,22 +1,26 @@
 export const TEMPLATES = {
-    PORTRAIT:{
-        path: '/assets/templates/ngc-fake-template-portrait.png',
-        noOfPhotos: 3,
-        aspectRatio: 16 / 9,
+    ALPHA_YOUTH_1:{
+        path: '/assets/templates/alpha-youth-1.png',
+        noOfPhotos: 6,
         positions: [
-            { x: 78, y: 296, width: 923 },
-            { x: 78, y: 834, width: 923 },
-            { x: 78, y: 1374, width: 923 },
+            { x: 57.4, y: 71, width: 965.3, height: 467.1 },
+            { x: 57.4, y: 552.3, width: 474.9, height: 328.5 },
+            { x: 547.7, y: 552.3, width: 474.9, height: 328.5 },
+            { x: 57.4, y: 892.8, width: 474.9, height: 328.5 },
+            { x: 547.7, y: 892.8, width: 474.9, height: 328.5 },
+            { x: 57.4, y: 1233.2, width: 965.3, height: 467.1 },
         ],
     },
-    LANDSCAPE: {
-        path: '/assets/templates/ngc-fake-template.png',
-        noOfPhotos: 3,
-        aspectRatio: 16 / 9,
+    ALPHA_YOUTH_2:{
+        path: '/assets/templates/alpha-youth-1.png',
+        noOfPhotos: 6,
         positions: [
-            { x: 16, y: 359, width: 1256 },
-            { x: 1290, y: 359, width: 614 },
-            { x: 1290, y: 720, width: 614 },
+            { x: 57.4, y: 71, width: 965.3, height: 467.1 },
+            { x: 57.4, y: 552.3, width: 474.9, height: 328.5 },
+            { x: 547.7, y: 552.3, width: 474.9, height: 328.5 },
+            { x: 57.4, y: 892.8, width: 474.9, height: 328.5 },
+            { x: 547.7, y: 892.8, width: 474.9, height: 328.5 },
+            { x: 57.4, y: 1233.2, width: 965.3, height: 467.1 },
         ],
     }
 };

@@ -72,13 +72,16 @@ function EmailForm({ composedImages }) {
               <img
                 src={image}
                 alt={`Preview ${key}`}
-                className="img-fluid rounded shadow mb-2"
+                className="img-fluid rounded mb-2"
                 style={{
                   maxHeight: '100%',
                   maxWidth: '100%',
                   objectFit: 'contain',
+                  boxShadow: '0 4px 20px rgba(0, 0, 0, 0.7)',
+                  borderRadius: '1rem', // optional for a soft rounded look
                 }}
               />
+
               <Form.Check
                 type="checkbox"
                 id={`select-${key}`}

@@ -12,14 +12,7 @@ function App() {
   return (
     <Container
       fluid
-      className="d-flex flex-column align-items-center justify-content-center"
-      style={{
-        minHeight: '100vh',
-        padding: '2rem',
-        backgroundImage: 'url("/assets/background.jpg")',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-      }}
+      className="d-flex flex-column align-items-center justify-content-center app-background"
     >
       <div className="w-100" style={{ maxWidth: '100%' }}>
         {!capturedImages.length ? (

@@ -23,7 +23,6 @@ function TemplateComposer({ images, onComposeComplete }) {
         canvas.height = templateImg.height;
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.drawImage(templateImg, 0, 0);
 
         let loadedCount = 0;
 
@@ -33,12 +32,33 @@ function TemplateComposer({ images, onComposeComplete }) {
 
           img.onload = () => {
             const pos = templateData.positions[index];
-            const targetHeight = pos.width / templateData.aspectRatio;
+            const { x, y, width, height } = pos;
 
-            ctx.drawImage(img, pos.x, pos.y, pos.width, targetHeight);
+            const imgAspect = img.width / img.height;
+            const boxAspect = width / height;
+
+            let sx, sy, sWidth, sHeight;
+
+            if (imgAspect > boxAspect) {
+              // Image is wider than the box: crop the sides
+              sHeight = img.height;
+              sWidth = sHeight * boxAspect;
+              sx = (img.width - sWidth) / 2;
+              sy = 0;
+            } else {
+              // Image is taller than the box: crop top and bottom
+              sWidth = img.width;
+              sHeight = sWidth / boxAspect;
+              sx = 0;
+              sy = (img.height - sHeight) / 2;
+            }
+
+            ctx.drawImage(img, sx, sy, sWidth, sHeight, x, y, width, height);
 
             loadedCount++;
             if (loadedCount === templateData.positions.length) {
+              // Draw the template ON TOP of photos
+              ctx.drawImage(templateImg, 0, 0);
               const finalImage = canvas.toDataURL(GLOBAL.IMAGE_FORMAT);
               composedResults.push({ key: templateKey, image: finalImage });
               callback();
@@ -55,7 +75,7 @@ function TemplateComposer({ images, onComposeComplete }) {
       if (current >= templateKeys.length) {
         setComposedImages(composedResults);
         if (onComposeComplete) {
-          onComposeComplete(composedResults); // send all results if needed
+          onComposeComplete(composedResults);
         }
         return;
       }

@@ -4,5 +4,5 @@ export const GLOBAL = {
     IMAGE_COUNTDOWN: 1,
     CAPTURE_COUNTDOWN: 1,
     IMAGE_FORMAT: 'image/png',
-    MAX_PHOTOS: 3
+    MAX_PHOTOS: 6
 };

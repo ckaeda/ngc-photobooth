@@ -9,3 +9,18 @@ body {
 h2, h4 {
   font-weight: bold !important;
 }
+
+.app-background {
+  min-height: 100vh;
+  padding: 2rem;
+  background-image: url('/assets/background.jpg');
+  background-size: cover;
+  background-position: center;
+  transition: background-image 0.3s ease;
+}
+
+@media (orientation: portrait) {
+  .app-background {
+    background-image: url('/assets/background-portrait.jpg');
+  }
+}
