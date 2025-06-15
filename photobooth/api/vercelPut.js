@@ -19,7 +19,7 @@ export default async function handler(req, res) {
     const base64Data = base64.split(',')[1]; // remove "data:image/png;base64," part
     const buffer = Buffer.from(base64Data, 'base64');
 
-    const result = await put(`${Date.now()}-${filename}.png`, buffer, {
+    const result = await put(`${filename}.png`, buffer, {
       access: 'public',
     });
 
