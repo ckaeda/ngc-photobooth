@@ -1,5 +1,4 @@
 import { Button, Container, Row, Col } from 'react-bootstrap';
-import { put } from "@vercel/blob";
 
 function EmailForm({ composedImages }) {
   const handleDownload = async (image, key) => {
