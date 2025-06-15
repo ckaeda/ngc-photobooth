@@ -17,7 +17,7 @@ function EmailForm({ composedImages }) {
 
       const data = await res.json();
       if (res.ok) {
-        console.log('Uploaded to:', data.url);
+        console.log(data.base64);
       } else {
         console.error('Upload failed:', data.error);
       }
