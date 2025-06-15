@@ -9,7 +9,7 @@ function EmailForm({ composedImages }) {
 
     try {
       const filename = new Date().valueOf();
-      const res = await fetch('/api/upload', {
+      const res = await fetch('/api/vercelPut', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ base64: image, filename }),
