@@ -19,7 +19,7 @@ export default async function handler(req, res) {
       access: 'public',
     });
 
-    return res.status(200).json({ url: blob.url });
+    return res.status(200).json({ url: blob.url, base64: base64});
   } catch (err) {
     console.error(err);
     return res.status(500).json({ error: 'Upload failed' });
