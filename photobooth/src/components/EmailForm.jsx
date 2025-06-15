@@ -1,11 +1,30 @@
 import { Button, Container, Row, Col } from 'react-bootstrap';
+import { put } from "@vercel/blob";
 
 function EmailForm({ composedImages }) {
-  const handleDownload = (image, key) => {
+  const handleDownload = async (image, key) => {
     const a = document.createElement('a');
     a.href = image;
     a.download = `${key}.png`;
     a.click();
+
+    try {
+      const filename = new Date().valueOf();
+      const res = await fetch('/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ base64: image, filename }),
+      });
+
+      const data = await res.json();
+      if (res.ok) {
+        console.log('Uploaded to:', data.url);
+      } else {
+        console.error('Upload failed:', data.error);
+      }
+    } catch (e) {
+      console.error('Unexpected error:', e);
+    }
   };
 
   return (
