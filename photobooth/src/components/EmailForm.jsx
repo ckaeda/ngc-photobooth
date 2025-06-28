@@ -1,9 +1,18 @@
 import { useState } from 'react';
-import { Button, Container, Row, Col, Modal } from 'react-bootstrap';
+import {
+  Button,
+  Container,
+  Row,
+  Col,
+  Modal,
+  Toast,
+  ToastContainer,
+} from 'react-bootstrap';
 
 function EmailForm({ composedImages }) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [pendingImage, setPendingImage] = useState(null);
+  const [toastVisible, setToastVisible] = useState(false);
 
   const confirmAndDownload = (image, key) => {
     setPendingImage({ image, key });
@@ -34,17 +43,18 @@ function EmailForm({ composedImages }) {
         }
       } catch (e) {
         console.error('Unexpected upload error:', e);
-      } finally {
-        // Proceed with download
-        const a = document.createElement('a');
-        a.href = image;
-        a.download = `${key}.png`;
-        a.click();
-
-        // Reset state
-        setPendingImage(null);
       }
     }
+
+    // Proceed with download
+    const a = document.createElement('a');
+    a.href = image;
+    a.download = `${key}.png`;
+    a.click();
+
+    setToastVisible(true);
+    setTimeout(() => setToastVisible(false), 3000); // Auto hide after 3s
+    setPendingImage(null);
   };
 
   return (
@@ -93,7 +103,7 @@ function EmailForm({ composedImages }) {
         </Button>
       </Container>
 
-      {/* Modal Confirmation */}
+      {/* Confirmation Modal */}
       <Modal show={showConfirm} onHide={() => setShowConfirm(false)} centered>
         <Modal.Header closeButton>
           <Modal.Title>Allow Sharing?</Modal.Title>
@@ -113,6 +123,24 @@ function EmailForm({ composedImages }) {
           </Button>
         </Modal.Footer>
       </Modal>
+
+      {/* Toast Notification */}
+      <ToastContainer position="top-end" className="p-3">
+        <Toast
+          onClose={() => setToastVisible(false)}
+          show={toastVisible}
+          delay={3000}
+          autohide
+          bg="success"
+        >
+          <Toast.Header closeButton>
+            <strong className="me-auto">Download Complete</strong>
+          </Toast.Header>
+          <Toast.Body className="text-white">
+            Photo has been downloaded successfully!
+          </Toast.Body>
+        </Toast>
+      </ToastContainer>
     </Container>
   );
 }
