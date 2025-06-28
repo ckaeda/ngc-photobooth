@@ -1,28 +1,49 @@
-import { Button, Container, Row, Col } from 'react-bootstrap';
+import { useState } from 'react';
+import { Button, Container, Row, Col, Modal } from 'react-bootstrap';
 
 function EmailForm({ composedImages }) {
-  const handleDownload = async (image, key) => {
-    const a = document.createElement('a');
-    a.href = image;
-    a.download = `${key}.png`;
-    a.click();
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [pendingImage, setPendingImage] = useState(null);
 
-    try {
-      const filename = new Date().valueOf();
-      const res = await fetch('/api/vercelPut', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ base64: image, filename }),
-      });
+  const confirmAndDownload = (image, key) => {
+    setPendingImage({ image, key });
+    setShowConfirm(true);
+  };
 
-      const data = await res.json();
-      if (res.ok) {
-        console.log(data.url);
-      } else {
-        console.error('Upload failed:', data.error);
+  const handleUserChoice = async (consent) => {
+    if (!pendingImage) return;
+
+    const { image, key } = pendingImage;
+    setShowConfirm(false);
+
+    // If consented, send to Vercel
+    if (consent) {
+      try {
+        const filename = new Date().valueOf();
+        const res = await fetch('/api/vercelPut', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ base64: image, filename }),
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          console.log('Uploaded to Vercel:', data.url);
+        } else {
+          console.error('Upload failed:', data.error);
+        }
+      } catch (e) {
+        console.error('Unexpected upload error:', e);
+      } finally {
+        // Proceed with download
+        const a = document.createElement('a');
+        a.href = image;
+        a.download = `${key}.png`;
+        a.click();
+
+        // Reset state
+        setPendingImage(null);
       }
-    } catch (e) {
-      console.error('Unexpected error:', e);
     }
   };
 
@@ -48,13 +69,17 @@ function EmailForm({ composedImages }) {
                   borderRadius: '1rem',
                 }}
               />
-
-              <Button variant="primary" size="sm" onClick={() => handleDownload(image, key)}>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => confirmAndDownload(image, key)}
+              >
                 Download
               </Button>
             </Col>
           ))}
         </Row>
+
         <Button
           variant="danger"
           className="mt-3"
@@ -67,6 +92,27 @@ function EmailForm({ composedImages }) {
           Retake Pictures
         </Button>
       </Container>
+
+      {/* Modal Confirmation */}
+      <Modal show={showConfirm} onHide={() => setShowConfirm(false)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Allow Sharing?</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          <p>
+            Would you like to allow this photo to be sent to NGC's social media
+            committee for possible posting?
+          </p>
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => handleUserChoice(false)}>
+            No, just download
+          </Button>
+          <Button variant="primary" onClick={() => handleUserChoice(true)}>
+            Yes, you may share
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </Container>
   );
 }
