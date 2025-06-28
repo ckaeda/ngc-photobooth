@@ -13,6 +13,7 @@ function EmailForm({ composedImages }) {
   const [showConfirm, setShowConfirm] = useState(false);
   const [pendingImage, setPendingImage] = useState(null);
   const [toastVisible, setToastVisible] = useState(false);
+  const [uploadingToastVisible, setUploadingToastVisible] = useState(false);
 
   const confirmAndDownload = (image, key) => {
     setPendingImage({ image, key });
@@ -25,8 +26,10 @@ function EmailForm({ composedImages }) {
     const { image, key } = pendingImage;
     setShowConfirm(false);
 
-    // If consented, send to Vercel
+    // If consented, show uploading toast and upload to Vercel
     if (consent) {
+      setUploadingToastVisible(true);
+
       try {
         const filename = new Date().valueOf();
         const res = await fetch('/api/vercelPut', {
@@ -44,6 +47,8 @@ function EmailForm({ composedImages }) {
       } catch (e) {
         console.error('Unexpected upload error:', e);
       }
+
+      setUploadingToastVisible(false);
     }
 
     // Proceed with download
@@ -53,7 +58,7 @@ function EmailForm({ composedImages }) {
     a.click();
 
     setToastVisible(true);
-    setTimeout(() => setToastVisible(false), 3000); // Auto hide after 3s
+    setTimeout(() => setToastVisible(false), 3000); // Auto-hide
     setPendingImage(null);
   };
 
@@ -94,7 +99,11 @@ function EmailForm({ composedImages }) {
           variant="danger"
           className="mt-3"
           onClick={() => {
-            if (window.confirm('Are you sure you want to retake the pictures? Your current photos will be lost.')) {
+            if (
+              window.confirm(
+                'Are you sure you want to retake the pictures? Your current photos will be lost.'
+              )
+            ) {
               window.location.reload();
             }
           }}
@@ -124,8 +133,9 @@ function EmailForm({ composedImages }) {
         </Modal.Footer>
       </Modal>
 
-      {/* Toast Notification */}
+      {/* Toast Notifications */}
       <ToastContainer position="top-end" className="p-3">
+        {/* Download Toast */}
         <Toast
           onClose={() => setToastVisible(false)}
           show={toastVisible}
@@ -139,6 +149,18 @@ function EmailForm({ composedImages }) {
           <Toast.Body className="text-white">
             Photo has been downloaded successfully!
           </Toast.Body>
+        </Toast>
+
+        {/* Uploading Toast */}
+        <Toast
+          onClose={() => setUploadingToastVisible(false)}
+          show={uploadingToastVisible}
+          bg="info"
+        >
+          <Toast.Header closeButton>
+            <strong className="me-auto">Uploading</strong>
+          </Toast.Header>
+          <Toast.Body className="text-white">Please wait while your photo is being sent to our social media committee...</Toast.Body>
         </Toast>
       </ToastContainer>
     </Container>
