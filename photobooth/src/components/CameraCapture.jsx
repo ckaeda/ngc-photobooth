@@ -169,10 +169,10 @@ function CameraCapture({ onCaptureComplete }) {
               top: '50%',
               left: '50%',
               transform: 'translate(-50%, -50%)',
-              fontSize: '10rem',
+              fontSize: '30rem',
               fontWeight: 'bold',
               color: 'white',
-              opacity: countdown / 10,
+              opacity: (countdown + 3) / 10,
               textShadow: '2px 2px 8px rgba(0,0,0,0.8)',
               pointerEvents: 'none',
             }}
