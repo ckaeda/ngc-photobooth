@@ -46,7 +46,7 @@ export default async function handler(req, res) {
       parents: [process.env.DRIVE_FOLDER_ID] 
     };
 
-    const uploadResponse = driveService.files.create({
+    const uploadResponse = await driveService.files.create({
       requestBody: fileMetadata,
       media: {
         mimeType: "image/png",
@@ -59,7 +59,7 @@ export default async function handler(req, res) {
     const viewLink = uploadResponse.data.webViewLink;
 
     // Make file publicly readable
-    driveService.permissions.create({
+    await driveService.permissions.create({
       fileId: fileId,
       requestBody: {
         role: "reader",

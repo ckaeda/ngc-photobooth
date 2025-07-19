@@ -39,7 +39,7 @@ function EmailForm({ composedImages }) {
         });
 
         const data = await res.json();
-        if (res.ok) {
+        if (res.status == 200) {
           console.log('Uploaded to Vercel:', data.url);
         } else {
           console.error('Upload failed:', data.error);
