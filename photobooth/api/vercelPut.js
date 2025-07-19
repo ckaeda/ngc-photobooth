@@ -32,7 +32,7 @@ export default async function handler(req, res) {
         client_x509_cert_url: process.env.CLIENT_X509_CERT_URL,
         universe_domain: process.env.UNIVERSE_DOMAIN,
       },
-      scopes: ["https://www.googleapis.com/auth/drive"],
+      scopes: ["https://www.googleapis.com/auth/drive.file"],
     });
 
     const driveService = google.drive({ version: "v3", auth });
@@ -43,7 +43,7 @@ export default async function handler(req, res) {
 
     const fileMetadata = { 
       name: filename,
-      parents: [process.env.DRIVE_FOLDER_ID] 
+      parents: [process.env.DRIVE_FOLDER_ID],
     };
 
     const uploadResponse = await driveService.files.create({
