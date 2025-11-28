@@ -21,6 +21,6 @@ h2, h4 {
 
 @media (orientation: portrait) {
   .app-background {
-    background-image: url('/assets/background-portrait.jpg');
+    background-image: url('/assets/background-portrait.png');
   }
 }

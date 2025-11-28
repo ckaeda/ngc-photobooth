@@ -1,26 +1,11 @@
 export const TEMPLATES = {
-    ALPHA_YOUTH_1:{
-        path: '/assets/templates/alpha-youth-ep4-1.png',
-        noOfPhotos: 6,
+    NGC_CHRISTMAS_PARTY: {
+        path: '/assets/templates/christmas-party-2025.png',
+        noOfPhotos: 3,
         positions: [
-            { x: 57.4, y: 71, width: 965.3, height: 467.1 },
-            { x: 57.4, y: 552.3, width: 474.9, height: 328.5 },
-            { x: 547.7, y: 552.3, width: 474.9, height: 328.5 },
-            { x: 57.4, y: 892.8, width: 474.9, height: 328.5 },
-            { x: 547.7, y: 892.8, width: 474.9, height: 328.5 },
-            { x: 57.4, y: 1233.2, width: 965.3, height: 467.1 },
+            { x: 108, y: 108.1, width: 864, height: 476 },
+            { x: 108, y: 614.1, width: 864, height: 476 },
+            { x: 108, y: 1120.1, width: 864, height: 476 },
         ],
     }
-    // ALPHA_YOUTH_2:{
-    //     path: '/assets/templates/alpha-youth-ep4-2.png',
-    //     noOfPhotos: 6,
-    //     positions: [
-    //         { x: 57.4, y: 71, width: 965.3, height: 467.1 },
-    //         { x: 57.4, y: 552.3, width: 474.9, height: 328.5 },
-    //         { x: 547.7, y: 552.3, width: 474.9, height: 328.5 },
-    //         { x: 57.4, y: 892.8, width: 474.9, height: 328.5 },
-    //         { x: 547.7, y: 892.8, width: 474.9, height: 328.5 },
-    //         { x: 57.4, y: 1233.2, width: 965.3, height: 467.1 },
-    //     ],
-    // }
 };
