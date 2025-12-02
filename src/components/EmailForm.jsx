@@ -1,18 +1,20 @@
 import { useState } from 'react';
-import { Button, Container, Row, Col, Form } from 'react-bootstrap';
+import { Button, Container, Row, Col, Form, Spinner } from 'react-bootstrap';
 
-function EmailForm({ composedImages }) {
+function EmailForm({ composedImages, filename, setErrorMessage }) {
   const [isAllowShare, setAllowShare] = useState(true);
+  const [status, setStatus] = useState('');
+  const [hasDownloaded, setHasDownloaded] = useState(false);
+  const [url, setUrl] = useState('');
 
   const handleDownload = async (image, key) => {
-    const a = document.createElement('a');
-    a.href = image;
-    a.download = `${key}.png`;
-    a.click();
+    if (hasDownloaded && !window.confirm('You have already downloaded this photo. Do you want to download it again?')) {
+      return;
+    }
 
     if (isAllowShare) {
       try {
-        const filename = new Date().valueOf();
+        setStatus('Uploading for social media. Your download will be prepared shortly...');
         const res = await fetch('/api/vercelPut', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -22,14 +24,23 @@ function EmailForm({ composedImages }) {
         const data = await res.json();
 
         if (res.ok) {
-          console.log(data.url);
+          setUrl(data.url);
         } else {
           console.error('Upload failed:', data.error);
+          setErrorMessage('Upload failed. Please try again later.');
         }
       } catch (e) {
         console.error('Unexpected error:', e);
       }
     }
+
+    setStatus('Preparing download...');
+    const a = document.createElement('a');
+    a.href = image;
+    a.download = `${key}.png`;
+    a.click();
+    setStatus('Download complete!');
+    setHasDownloaded(true);
   };
 
   return (
@@ -53,6 +64,7 @@ function EmailForm({ composedImages }) {
                   boxShadow: '0 4px 20px rgba(0, 0, 0, 0.7)',
                   borderRadius: '1rem',
                 }}
+                onContextMenu={e => e.preventDefault()}
               />
 
               <div
@@ -90,7 +102,53 @@ function EmailForm({ composedImages }) {
                 </label>
               </div>
 
-              <Button variant="primary" size="sm" onClick={() => handleDownload(image, key)}>
+              {status &&
+                <div style={{
+                  marginBottom: '0.8rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  justifyContent: 'center'
+                }}>
+                  {status !== 'Download complete!' && (
+                    <Spinner
+                      animation="border"
+                      role="status"
+                      variant="primary"
+                      style={{ width: '1.25rem', height: '1.25rem', flex: '0 0 auto' }}
+                    />
+                  )}
+                  <span style={{
+                    color: 'black',
+                    display: 'inline-block',
+                    maxWidth: '24rem',
+                    wordBreak: 'break-word'
+                  }}
+                  >
+                    {status}
+                  </span>
+
+                </div>}
+
+              {url && (
+                <div style={{
+                  marginBottom: '0.8rem',
+                  color: 'black',
+                }}
+                >
+                  {"Did not find your photo? Click "}
+                  <a href={url} target="_blank" rel="noopener noreferrer" style={{ color: 'blue', textDecoration: 'underline' }}>
+                    here
+                  </a>.
+                </div>
+              )}
+
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => handleDownload(image, key)}
+                disabled={status !== '' && status !== 'Download complete!'}
+              >
                 Download
               </Button>
             </Col>
@@ -104,6 +162,7 @@ function EmailForm({ composedImages }) {
               window.location.reload();
             }
           }}
+          disabled={status !== '' && status !== 'Download complete!'}
         >
           Retake Pictures
         </Button>
