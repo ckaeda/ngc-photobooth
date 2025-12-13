@@ -106,40 +106,49 @@ function EmailForm({ composedImages, filename, setErrorMessage }) {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '0.5rem',
-                  justifyContent: 'center'
+                  justifyContent: 'center',
+                  background: "rgba(156, 156, 156, 0.7)",
+                  borderRadius: "5px",
+                  padding: "0.6rem 0.8rem"
                 }}>
                   {status !== 'Download complete!' && (
                     <Spinner
                       animation="border"
                       role="status"
                       variant="primary"
-                      style={{ width: '1.25rem', height: '1.25rem', flex: '0 0 auto' }}
+                      style={{
+                        width: '1.25rem',
+                        height: '1.25rem',
+                        flex: '0 0 auto'
+                      }}
                     />
                   )}
                   <span style={{
-                    color: 'black',
+                    color: 'white',
                     display: 'inline-block',
                     maxWidth: '24rem',
                     wordBreak: 'break-word'
                   }}
                   >
-                    {status}
+                    {
+                      url
+                        ?
+                        (
+                          <>
+                            {status}
+                            <br />
+                            {"Can't download your photo? Click "}
+                            < a href={url} target="_blank" rel="noopener noreferrer" style={{ color: 'blue', textDecoration: 'underline' }}>
+                              here
+                            </a>.
+                          </>
+                        )
+                        :
+                        status
+                    }
                   </span>
-
-                </div>}
-
-              {url && (
-                <div style={{
-                  marginBottom: '0.8rem',
-                  color: 'black',
-                }}
-                >
-                  {"Can't download your photo? Click "}
-                  <a href={url} target="_blank" rel="noopener noreferrer" style={{ color: 'blue', textDecoration: 'underline' }}>
-                    here
-                  </a>.
                 </div>
-              )}
+              }
 
               <Button
                 variant="primary"
