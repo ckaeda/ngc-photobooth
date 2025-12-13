@@ -19,8 +19,8 @@ h2, h4 {
   transition: background-image 0.3s ease;
 }
 
-@media (orientation: portrait) {
+/* @media (orientation: portrait) {
   .app-background {
     background-image: url('/assets/background-portrait.png');
   }
-}
+} */
