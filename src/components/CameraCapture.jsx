@@ -26,7 +26,7 @@ function CameraCapture({ onCaptureComplete }) {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
 
-    const previewAspectRatio = GLOBAL.ASPECT_RATIO;
+    const previewAspectRatio = GLOBAL.ASPECT_RATIO_X / GLOBAL.ASPECT_RATIO_Y;
     const { videoWidth, videoHeight } = video;
 
     let srcWidth = videoWidth;
@@ -139,7 +139,7 @@ function CameraCapture({ onCaptureComplete }) {
           playsInline
           className="border rounded w-100"
           style={{
-            aspectRatio: GLOBAL.ASPECT_RATIO_STR,
+            aspectRatio: `${GLOBAL.ASPECT_RATIO_X} / ${GLOBAL.ASPECT_RATIO_Y}`,
             objectFit: 'cover',
             transform: isMirrored ? 'scaleX(-1)' : 'none',
           }}

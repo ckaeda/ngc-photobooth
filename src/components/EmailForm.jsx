@@ -42,12 +42,11 @@ function EmailForm({ composedImages, filename, setErrorMessage }) {
   };
 
   return (
-    <Container className="p-4" style={{ maxWidth: '50rem', overflowY: "hidden" }}>
+    <Container className="p-4" style={{ maxWidth: '100vw', overflowY: "hidden" }}>
       <Container className="text-center mb-4">
         <Row className="g-3">
           {composedImages.map(({ key, image }) => (
             <Col
-              md={6}
               key={key}
               className="d-flex flex-column justify-content-start align-items-center mb-3 mx-auto d-block"
             >
@@ -57,6 +56,7 @@ function EmailForm({ composedImages, filename, setErrorMessage }) {
                 className="img-fluid rounded mb-2 mx-auto d-block"
                 style={{
                   maxWidth: '100%',
+                  maxHeight: 'fit-content',
                   height: '65vh',
                   objectFit: 'contain',
                   boxShadow: '0 4px 20px rgba(0, 0, 0, 0.7)',

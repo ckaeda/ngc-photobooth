@@ -1,11 +1,11 @@
 export const TEMPLATES = {
-    NGC_CHRISTMAS_PARTY: {
-        path: '/assets/templates/christmas-party-2025.png',
+    PASKONG_PINOY: {
+        path: '/assets/templates/paskong-pinoy-2025.png',
         noOfPhotos: 3,
         positions: [
-            { x: 108, y: 108.1, width: 864, height: 476 },
-            { x: 108, y: 614.1, width: 864, height: 476 },
-            { x: 108, y: 1120.1, width: 864, height: 476 },
+            { x: 47.4, y: 117.7, width: 1136.4, height: 639.2 },
+            { x: 1210.6, y: 117.7, width: 662, height: 372.4 },
+            { x: 1210.6, y: 512.5, width: 662, height: 372.4 },
         ],
     }
 };
