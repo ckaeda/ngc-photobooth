@@ -9,13 +9,14 @@ async function downloadAllBlobs() {
         const { blobs } = await list({
             token: process.env.BLOB_READ_WRITE_TOKEN,
         });
+        const filteredBlobs = blobs.filter(blob => blob.pathname.includes("post_"))
 
-        if (!blobs || blobs.length === 0) {
+        if (!blobs || filteredBlobs.length === 0) {
             console.log("No blobs found.");
             return;
         }
 
-        for (const blob of blobs) {
+        for (const blob of filteredBlobs) {
             console.log(`Downloading: ${blob.pathname}`);
 
             // Fetch file

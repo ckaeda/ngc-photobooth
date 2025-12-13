@@ -12,35 +12,33 @@ function EmailForm({ composedImages, filename, setErrorMessage }) {
       return;
     }
 
-    if (isAllowShare) {
-      try {
-        setStatus('Uploading for social media. Your download will be prepared shortly...');
-        const res = await fetch('/api/vercelPut', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ base64: image, filename }),
-        });
+    try {
+      setStatus('Preparing download...');
+      const res = await fetch('/api/vercelPut', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ base64: image, filename: isAllowShare ? `post_${filename}` : filename }),
+      });
 
-        const data = await res.json();
+      const data = await res.json();
 
-        if (res.ok) {
-          setUrl(data.url);
-        } else {
-          console.error('Upload failed:', data.error);
-          setErrorMessage('Upload failed. Please try again later.');
-        }
-      } catch (e) {
-        console.error('Unexpected error:', e);
+      if (res.ok) {
+        setUrl(data.url);
+      } else {
+        console.error('Upload failed:', data.error);
+        setErrorMessage('Upload failed. Please try again later.');
       }
+    } catch (e) {
+      console.error('Unexpected error:', e);
+    } finally {
+      setStatus('Downloading...');
+      const a = document.createElement('a');
+      a.href = image;
+      a.download = `${key}.png`;
+      a.click();
+      setStatus('Download complete!');
+      setHasDownloaded(true);
     }
-
-    setStatus('Preparing download...');
-    const a = document.createElement('a');
-    a.href = image;
-    a.download = `${key}.png`;
-    a.click();
-    setStatus('Download complete!');
-    setHasDownloaded(true);
   };
 
   return (
@@ -136,7 +134,7 @@ function EmailForm({ composedImages, filename, setErrorMessage }) {
                   color: 'black',
                 }}
                 >
-                  {"Did not find your photo? Click "}
+                  {"Can't download your photo? Click "}
                   <a href={url} target="_blank" rel="noopener noreferrer" style={{ color: 'blue', textDecoration: 'underline' }}>
                     here
                   </a>.
@@ -145,7 +143,7 @@ function EmailForm({ composedImages, filename, setErrorMessage }) {
 
               <Button
                 variant="primary"
-                size="sm"
+                size="lg"
                 onClick={() => handleDownload(image, key)}
                 disabled={status !== '' && status !== 'Download complete!'}
               >
@@ -156,6 +154,7 @@ function EmailForm({ composedImages, filename, setErrorMessage }) {
         </Row>
         <Button
           variant="danger"
+          size='sm'
           // className="mt-3"
           onClick={() => {
             if (window.confirm('Are you sure you want to retake the pictures? Your current photos will be lost.')) {
