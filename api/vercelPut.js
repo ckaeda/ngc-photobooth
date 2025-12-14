@@ -21,6 +21,7 @@ export default async function handler(req, res) {
 
     const result = await put(`${filename}.png`, buffer, {
       access: 'public',
+      multipart: true
     });
 
     return res.status(200).json({ url: result.url });
